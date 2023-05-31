@@ -7,7 +7,6 @@ public:
 	enum class Type : uint8_t
 	{
 		reg,
-		mem,
 		modrm,
 		imm
 	};

@@ -1,6 +1,5 @@
 #include "DescriptorOperand.hpp"
-
-#define ARRAY_SIZE(array) (sizeof(array) / sizeof((array)[0]))
+#include "tools/ArraySize.h"
 
 DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 {

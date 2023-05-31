@@ -86,5 +86,8 @@
     <ClInclude Include="compiler\Prefix.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="tools\ArraySize.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

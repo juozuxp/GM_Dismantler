@@ -32,9 +32,13 @@ public:
 #pragma pack(pop)
 public:
 	ByteEntry() = default;
+
 	ByteEntry(const Prefix& prefix);
 	ByteEntry(const Instruction& instruction);
 	ByteEntry(const Redirection& redirection);
+
+public:
+	Package GetPackage() const;
 
 private:
 	PackageType m_Type = PackageType::Invalid;
