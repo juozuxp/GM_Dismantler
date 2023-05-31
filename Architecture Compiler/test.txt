@@ -1,0 +1,332 @@
+14 -> ADC AL, imm8
+15 -> ADC AX|EAX|RAX, imm16|32
+
+80 /2 -> ADC r/m8, imm8
+81 /2 -> ADC r/m16|32|64, imm16|32
+83 /2 -> ADC r/m16|32|64, imm8
+
+10 -> ADC r/m8, r8
+11 -> ADC r/m16|32|64, r16|32|64
+12 -> ADC r8, r/m8
+13 -> ADC r16|32|64, r/m16|32|64
+
+66 0F 38 F6 -> ADCX r32|64, r/m32|64
+
+04 -> ADD AL, imm8
+05 -> ADD AX|EAX|RAX, imm16|32
+
+80 /0 -> ADD r/m8, imm8
+81 /0 -> ADD r/m16|32|64, imm16|32
+83 /0 -> ADD r/m16|32|64, imm8
+
+00 -> ADD r/m8, r8
+01 -> ADD r/m16|32|64, r16|32|64
+02 -> ADD r8, r/m8
+03 -> ADD r16|32|64, r/m16|32|64
+
+66 0F 58 -> ADDPD xmm, xmm/m128
+0F 58 -> ADDPS xmm, xmm/m128
+F2 0F 58 -> ADDSD xmm, xmm/m64
+F3 0F 58 -> ADDSS xmm, xmm/m32
+
+66 0F D0 -> ADDSUBPD xmm, xmm/m128
+F2 0F D0 -> ADDSUBPS xmm, xmm/m128
+
+F3 0F 38 F6 -> ADOX r32|64, r/m32|64
+
+66 0F 38 DE -> AESDEC xmm, xmm/m128
+F3 0F 38 DD -> AESDEC128KL xmm, m
+F3 0F 38 DF -> AESDEC256KL xmm, m
+
+66 0F 38 DF -> AESDECLAST xmm, xmm/m128
+
+F3 0F 38 D8 /1 -> AESDECWIDE128KL m
+F3 0F 38 D8 /3 -> AESDECWIDE256KL m
+
+66 0F 38 DC -> AESENC xmm, xmm/m128
+
+F3 0F 38 DC -> AESENC128KL xmm, m
+F3 0F 38 DE -> AESENC256KL xmm, m
+
+66 0F 38 DD -> AESENCLAST xmm, xmm/m128
+
+F3 0F 38 D8 /0 -> AESENCWIDE128KL m
+F3 0F 38 D8 /2 -> AESENCWIDE256KL m
+
+66 0F 38 DB -> AESIMC xmm, xmm/m128
+
+66 0F 3A DF -> AESKEYGENASSIST xmm, xmm/m128, imm8
+
+24 -> AND AL, imm8
+25 -> AND AX|EAX|RAX, imm16|32
+
+80 /4 -> AND r/m8, imm8
+81 /4 -> AND r/m16|32|64, imm16|32
+83 /4 -> AND r/m16|32|64, imm8
+
+20 -> AND r/m8, r8
+21 -> AND r/m16|32|64, r16|32|64
+
+22 -> AND r8, r/m8
+23 -> AND r16|32|64, r/m16|32|64
+
+66 0F 54 -> ANDPD xmm, xmm/m128
+0F 54 -> ANDPS xmm, xmm/m128
+
+66 0F 55 -> ANDNPD xmm, xmm/m128
+0F 55 -> ANDNPS xmm, xmm/m128
+
+66 0F 3A 0D -> BLENDPD xmm, xmm/m128, imm8
+66 0F 3A 0C -> BLENDPS xmm, xmm/m128, imm8
+
+66 0F 38 15 -> BLENDVPD xmm, xmm/m128, xmm0
+66 0F 38 14 -> BLENDVPS xmm, xmm/m128, xmm0
+
+F3 0F 1A -> BNDCL bnd, r/m64
+F2 0F 1A -> BNDCU bnd, r/m64
+F2 0F 1B -> BNDCN bnd, r/m64
+
+0F 1A -> BNDLDX bnd, m
+
+F3 0F 1B -> BNDMK bnd, m64
+
+66 0F 1A -> BNDMOV bnd, bnd/m128
+66 0F 1B -> BNDMOV bnd/m128, bnd
+
+0F 1B -> BNDSTX m, bnd
+
+0F BC -> BSF r16|32|64, r/m16|32|64
+0F BD -> BSR r16|32|64, r/m16|32|64
+
+0F C8 -> BSWAP EAX|RAX|REX
+0F C9 -> BSWAP ECX|RCX|REX
+0F CA -> BSWAP EDX|RDX|REX
+0F CB -> BSWAP EBX|RBX|REX
+0F CC -> BSWAP ESP|RSP|REX
+0F CD -> BSWAP EBP|RBP|REX
+0F CE -> BSWAP ESI|RSI|REX
+0F CF -> BSWAP EDI|RDI|REX
+
+0F A3 -> BT r/m16|32|64, r16|32|64
+0F BA /4 -> BT r/m16|32|64, imm8
+
+0F BB -> BTC r/m16|32|64, r16|32|64
+0F BA /7 -> BTC r/m16|32|64, imm8
+
+0F B3 -> BTR r/m16|32|64, r16|32|64
+0F BA /6 -> BTR r/m16|32|64, imm8
+
+0F AB -> BTS r/m16|32|64, r16|32|64
+0F BA /5 -> BTS r/m16|32|64, imm8
+
+E8 -> CALL rel16|32
+FF /2 -> CALL r/m64
+FF /3 -> CALL m
+
+66 98 -> CBW
+98 -> CWDE
+48 98 -> CDQE
+
+0F 01 CA -> CLAC
+
+F8 -> CLC
+FC -> CLD
+
+0F 1C /0 -> CLDEMOTE m8
+
+0F AE /7 -> CLFLUSH m8
+66 0F AE /7 -> CLFLUSHOPT m8
+
+FA -> CLI
+
+F3 0F AE /6 -> CLRSSBSY m64
+
+0F 06 -> CLTS
+
+F3 0F 01 EE -> CLUI
+
+66 0F AE /6 -> CLWB m8
+
+F5 -> CMC
+
+0F 40 -> CMOVO r16|32|64, r/m16|32|64
+0F 41 -> CMOVNO r16|32|64, r/m16|32|64
+0F 42 -> CMOVB r16|32|64, r/m16|32|64
+0F 43 -> CMOVAE r16|32|64, r/m16|32|64
+0F 44 -> CMOVE r16|32|64, r/m16|32|64
+0F 45 -> CMOVNE r16|32|64, r/m16|32|64
+0F 46 -> CMOVBE r16|32|64, r/m16|32|64
+0F 47 -> CMOVA r16|32|64, r/m16|32|64
+0F 48 -> CMOVS r16|32|64, r/m16|32|64
+0F 49 -> CMOVNS r16|32|64, r/m16|32|64
+0F 4A -> CMOVP r16|32|64, r/m16|32|64
+0F 4B -> CMOVNP r16|32|64, r/m16|32|64
+0F 4C -> CMOVL r16|32|64, r/m16|32|64
+0F 4D -> CMOVGE r16|32|64, r/m16|32|64
+0F 4E -> CMOVLE r16|32|64, r/m16|32|64
+0F 4F -> CMOVG r16|32|64, r/m16|32|64
+
+3C -> CMP AL, imm8
+3D -> CMP AX|EAX|RAX, imm16|32
+
+80 /7 -> CMP r/m8, imm8
+81 /7 -> CMP r/m16|32|64, imm16|32
+83 /7 -> CMP r/m16|32|64, imm8
+
+38 -> CMP r/m8, r8
+39 -> CMP r/m16|32|64, r16|32|64
+
+3A -> CMP r8, r/m8
+3B -> CMP r16|32|64, r/m16|32|64
+
+66 0F C2 -> CMPPD xmm, xmm/m128, imm8
+0F C2 -> CMPPS xmm, xmm/m128, imm8
+
+A6 -> CMPSB
+
+66 A7 -> CMPSW
+A7 -> CMPSD
+48 A7 -> CMPSQ
+
+F2 0F C2 -> CMPSD xmm, xmm/m64, imm8
+F3 0F C2 -> CMPSS xmm, xmm/m32, imm8
+
+0F B0 -> CMPXCHG r/m8, r8
+0F B1 -> CMPXCHG r/m8|16|32, r8|16|32
+
+0F C7 /1 -> CMPXCHG8B m64
+48 0F C7 /1 -> CMPXCHG16B m128
+
+66 0F 2F -> COMISD xmm, xmm/m64
+0F 2F -> COMISS xmm, xmm/m32
+
+0F A2 -> CPUID
+
+F2 0F 38 F0 -> CRC32 r32|64, r/m8
+F2 0F 38 F1 -> CRC32 r32|64, r/m16|32|64
+
+F3 0F E6 -> CVTDQ2PD xmm, xmm/m64
+0F 5B -> CVTDQ2PS xmm, xmm/m128
+F2 0F E6 -> CVTPD2DQ xmm, xmm/m128
+
+66 0F 2D -> CVTPD2PI mm, xmm/m128
+
+66 0F 5A -> CVTPD2PS xmm, xmm/m128
+66 0F 2A -> CVTPI2PD xmm, mm/m64
+
+0F 2A -> CVTPI2PS xmm, mm/m64
+66 0F 5B -> CVTPS2DQ xmm, xmm/m128
+
+0F 5A -> CVTPS2PD xmm, xmm/m64
+0F 2D -> CVTPS2PI mm, xmm/m64
+
+F2 0F 2D -> CVTSD2SI r32|64, xmm/m64
+F2 0F 5A -> CVTSD2SS xmm, xmm/m64
+
+F2 0F 2A -> CVTSI2SD xmm, r/m32|64
+F3 0F 2A -> CVTSI2SS xmm, r/m32|64
+
+F3 0F 5A -> CVTSS2SD xmm, xmm/m32
+
+F3 0F 2D -> CVTSS2SI r32|64, xmm/m32
+66 0F E6 -> CVTTPD2DQ xmm, xmm/m128
+
+66 0F 2C -> CVTTPD2PI mm, xmm/m128
+
+F3 0F 5B -> CVTTPS2DQ xmm, xmm/m128
+
+0F 2C -> CVTTPS2PI mm, xmm/m64
+
+F2 0F 2C -> CVTTSD2SI r32|64, xmm/m64
+F3 0F 2C -> CVTTSS2SI r32|64, xmm1/m32
+
+66 99 -> CWD
+99 -> CDQ
+48 99 -> CQO
+
+FE /1 -> r/m8
+FF /1 -> r/m16|32|64
+
+F6 /6 -> DIV r/m8
+F7 /6 -> DIV r/m16|32|64
+
+66 0F 5E -> DIVPD xmm, xmm/m128
+0F 5E -> DIVPS xmm, xmm/m128
+
+F2 0F 5E -> DIVSD xmm, xmm/m64
+F3 0F 5E -> DIVSS xmm, xmm/m32
+
+66 0F 3A 41 -> DPPD xmm, xmm/m128, imm8
+66 0F 3A 40 -> DPPS xmm, xmm/m128, imm8
+
+0F 77 -> EMMS
+
+F3 0F 38 FA -> ENCODEKEY128 r32, r32
+F3 0F 38 FB -> ENCODEKEY256 r32, r32
+
+F3 0F 1E FB -> ENDBR32
+F3 0F 1E FA -> ENDBR64
+
+C8 -> ENTER imm16, imm8
+
+F2 0F 38 F8 -> ENQCMD r32|64, m512
+F3 0F 38 F8 -> ENQCMDS r32|64, m512
+
+66 0F 3A 17 -> EXTRACTPS r/m32, xmm, imm8
+
+D9 F0 -> F2XM1
+D9 E1 -> FABS
+
+D8 /0 -> FADD m32
+DC /0 -> FADD m64
+
+D8 /0 -> FADD ST(0), ST
+DC /0 -> FADD ST, ST(0)
+DE /0 -> FADDP ST, ST(0)
+
+DA /0 -> FIADD m32
+DE /0 -> FIADD m16
+
+DF /4 -> FBLD m
+DF /6 -> FBSTP m
+
+D9 E0 -> FCHS
+
+9B DB E2 -> FCLEX
+DB E2 -> FNCLEX
+
+DA /0 -> FCMOVB ST(0), ST
+DA /1 -> FCMOVE ST(0), ST
+DA /2 -> FCMOVBE ST(0), ST
+DA /3 -> FCMOVU ST(0), ST
+DB /0 -> FCMOVNB ST(0), ST
+DB /1 -> FCMOVNE ST(0), ST
+DB /2 -> FCMOVNBE ST(0), ST
+DB /3 -> FCMOVNU ST(0), ST
+
+D8 /2 -> FCOM m32
+DC /2 -> FCOM m64
+D8 /2 -> FCOM ST
+
+D8 /3 -> FCOMP m32
+DC /3 -> FCOMP m64
+D8 /3 -> FCOMP ST
+
+DB /6 -> FCOMI ST(0), ST
+DF /6 -> FCOMIP ST(0), ST
+
+DB /5 -> FUCOMI ST(0), ST
+DF /5 -> FUCOMIP ST(0), ST
+
+D9 FF -> FCOS
+D9 F6 -> FDECSTP
+
+D8 /6 -> FDIV m32
+DC /6 -> FDIV m64
+
+D8 /6 -> FDIV ST(0), ST
+DC /7 -> FDIV ST, ST(0)
+DE /7 -> FDIVP ST, ST(0)
+
+DA /6 -> FIDIV m32
+DE /6 -> FIDIV m16
