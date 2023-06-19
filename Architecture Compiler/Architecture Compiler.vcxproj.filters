@@ -113,8 +113,5 @@
     <ClInclude Include="packager\Package.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="result.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
 </Project>

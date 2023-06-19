@@ -52,7 +52,6 @@
     <ClInclude Include="lexer\Token.hpp" />
     <ClInclude Include="compiler\Redirection.hpp" />
     <ClInclude Include="compiler\Prefix.hpp" />
-    <ClInclude Include="result.hpp" />
     <ClInclude Include="tools\ArraySize.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">

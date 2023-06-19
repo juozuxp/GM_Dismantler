@@ -4,7 +4,7 @@
 class ByteEntry : std::enable_shared_from_this<ByteEntry>
 {
 public:
-	enum class PackageType
+	enum class PackageType : uint8_t
 	{
 		Invalid,
 		Prefix,

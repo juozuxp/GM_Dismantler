@@ -20,13 +20,13 @@ public:
 
 	enum class Prefix : uint8_t
 	{
-		x0F38,
-		x0F3A,
 		RexW,
 		Wait,
 		Repe,
 		Repne,
 		x66,
+		x0F38,
+		x0F3A,
 		Default,
 		ArrayMAX
 	};
