@@ -1,0 +1,42 @@
+66 0F 58 -> ADDPD xmm, xmm/m128
+F2 0F 58 -> ADDSD xmm, xmm/m64
+
+66 0F 54 -> ANDPD xmm, xmm/m128
+66 0F 55 -> ANDNPD xmm, xmm/m128
+
+66 0F C2 -> CMPPD xmm, xmm/m128, imm8
+F2 0F C2 -> CMPSD xmm, xmm/m64, imm8
+
+66 0F 2F -> COMISD xmm, xmm/m64
+
+F3 0F E6 -> CVTDQ2PD xmm, xmm/m64
+0F 5B -> CVTDQ2PS xmm, xmm/m128
+
+F2 0F E6 -> CVTPD2DQ xmm, xmm/m128
+66 0F 2D -> CVTPD2PI mm, xmm/m128
+
+66 0F 5A -> CVTPD2PS xmm, xmm/m128
+66 0F 2A -> CVTPI2PD xmm, mm/m64
+
+0F 2A -> CVTPI2PS xmm, mm/m64
+66 0F 5B -> CVTPS2DQ xmm, xmm/m128
+
+0F 5A -> CVTPS2PD xmm, xmm/m64
+0F 2D -> CVTPS2PI mm, xmm/m64
+
+F2 0F 2D -> CVTSD2SI r32|64, xmm/m64
+F2 0F 5A -> CVTSD2SS xmm, xmm/m64
+
+F2 0F 2A -> CVTSI2SD xmm, r/m32|64
+F3 0F 5A -> CVTSS2SD xmm, xmm/m32
+
+66 0F E6 -> CVTTPD2DQ xmm, xmm/m128
+66 0F 2C -> CVTTPD2PI mm, xmm/m128
+F3 0F 5B -> CVTTPS2DQ xmm, xmm/m128
+
+0F 2C -> CVTTPS2PI mm, xmm/m64
+
+F2 0F 2C -> CVTTSD2SI r32|64, xmm/m64
+
+66 0F 5E -> DIVPD xmm, xmm/m128
+F2 0F 5E -> DIVSD xmm, xmm/m64

@@ -1,0 +1,10 @@
+66 0F 3A 0D -> BLENDPD xmm, xmm/m128, imm8
+66 0F 3A 0C -> BLENDPS xmm, xmm/m128, imm8
+
+66 0F 38 15 -> BLENDVPD xmm, xmm/m128, xmm0
+66 0F 38 14 -> BLENDVPS xmm, xmm/m128, xmm0
+
+66 0F 3A 41 -> DPPD xmm, xmm/m128, imm8
+66 0F 3A 40 -> DPPS xmm, xmm/m128, imm8
+
+66 0F 3A 17 -> EXTRACTPS r/m32, xmm, imm8

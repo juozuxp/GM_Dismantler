@@ -1,23 +1,17 @@
 #pragma once
 #include <stdint.h>
+#include "parser/DescriptorOperand.hpp"
 
 class Operand
 {
 public:
 	enum class Type : uint8_t
 	{
+		none,
 		reg,
 		modrm,
-		imm
-	};
-
-	enum class Register : uint8_t
-	{
-		general,
-		xmm,
-		mm,
-		bnd,
-		st
+		imm,
+		rel
 	};
 
 #ifdef INSTRUCTION_PACKING
@@ -30,7 +24,7 @@ public:
 		struct
 		{
 			Type m_Type : 2;
-			Register m_Register : 6;
+			DescriptorOperand::Register m_Register : 6;
 		};
 
 		struct
@@ -54,7 +48,12 @@ public:
 #pragma pack(pop)
 
 public:
+	Operand() = default;
+	Operand(const DescriptorOperand& descriptor);
+
+public:
+	const Package& GetPackage() const;
 
 private:
-
+	Package m_Package = {};
 };

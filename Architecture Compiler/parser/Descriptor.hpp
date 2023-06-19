@@ -9,6 +9,13 @@ public:
 
 	Descriptor(const Token& token);
 
+public:
+	uint8_t GetUpperOperand() const;
+
+	const std::string& GetName() const;
+	const std::vector<uint8_t>& GetBytes() const;
+	const std::vector<DescriptorOperand>& GetOperands() const;
+
 private:
 	static constexpr uint8_t HexToByte(const char* hex)
 	{

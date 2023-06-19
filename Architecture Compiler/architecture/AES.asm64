@@ -1,0 +1,9 @@
+66 0F 38 DE -> AESDEC xmm, xmm/m128
+66 0F 38 DC -> AESENC xmm, xmm/m128
+
+66 0F 38 DF -> AESDECLAST xmm, xmm/m128
+66 0F 38 DD -> AESENCLAST xmm, xmm/m128
+
+66 0F 38 DB -> AESIMC xmm, xmm/m128
+
+66 0F 3A DF -> AESKEYGENASSIST xmm, xmm/m128, imm8

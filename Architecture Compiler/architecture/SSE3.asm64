@@ -1,0 +1,2 @@
+66 0F D0 -> ADDSUBPD xmm, xmm/m128
+F2 0F D0 -> ADDSUBPS xmm, xmm/m128

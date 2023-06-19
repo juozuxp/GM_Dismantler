@@ -10,8 +10,6 @@
 12 -> ADC r8, r/m8
 13 -> ADC r16|32|64, r/m16|32|64
 
-66 0F 38 F6 -> ADCX r32|64, r/m32|64
-
 04 -> ADD AL, imm8
 05 -> ADD AX|EAX|RAX, imm16|32
 
@@ -23,39 +21,6 @@
 01 -> ADD r/m16|32|64, r16|32|64
 02 -> ADD r8, r/m8
 03 -> ADD r16|32|64, r/m16|32|64
-
-66 0F 58 -> ADDPD xmm, xmm/m128
-0F 58 -> ADDPS xmm, xmm/m128
-F2 0F 58 -> ADDSD xmm, xmm/m64
-F3 0F 58 -> ADDSS xmm, xmm/m32
-
-66 0F D0 -> ADDSUBPD xmm, xmm/m128
-F2 0F D0 -> ADDSUBPS xmm, xmm/m128
-
-F3 0F 38 F6 -> ADOX r32|64, r/m32|64
-
-66 0F 38 DE -> AESDEC xmm, xmm/m128
-F3 0F 38 DD -> AESDEC128KL xmm, m
-F3 0F 38 DF -> AESDEC256KL xmm, m
-
-66 0F 38 DF -> AESDECLAST xmm, xmm/m128
-
-F3 0F 38 D8 /1 -> AESDECWIDE128KL m
-F3 0F 38 D8 /3 -> AESDECWIDE256KL m
-
-66 0F 38 DC -> AESENC xmm, xmm/m128
-
-F3 0F 38 DC -> AESENC128KL xmm, m
-F3 0F 38 DE -> AESENC256KL xmm, m
-
-66 0F 38 DD -> AESENCLAST xmm, xmm/m128
-
-F3 0F 38 D8 /0 -> AESENCWIDE128KL m
-F3 0F 38 D8 /2 -> AESENCWIDE256KL m
-
-66 0F 38 DB -> AESIMC xmm, xmm/m128
-
-66 0F 3A DF -> AESKEYGENASSIST xmm, xmm/m128, imm8
 
 24 -> AND AL, imm8
 25 -> AND AX|EAX|RAX, imm16|32
@@ -69,31 +34,6 @@ F3 0F 38 D8 /2 -> AESENCWIDE256KL m
 
 22 -> AND r8, r/m8
 23 -> AND r16|32|64, r/m16|32|64
-
-66 0F 54 -> ANDPD xmm, xmm/m128
-0F 54 -> ANDPS xmm, xmm/m128
-
-66 0F 55 -> ANDNPD xmm, xmm/m128
-0F 55 -> ANDNPS xmm, xmm/m128
-
-66 0F 3A 0D -> BLENDPD xmm, xmm/m128, imm8
-66 0F 3A 0C -> BLENDPS xmm, xmm/m128, imm8
-
-66 0F 38 15 -> BLENDVPD xmm, xmm/m128, xmm0
-66 0F 38 14 -> BLENDVPS xmm, xmm/m128, xmm0
-
-F3 0F 1A -> BNDCL bnd, r/m64
-F2 0F 1A -> BNDCU bnd, r/m64
-F2 0F 1B -> BNDCN bnd, r/m64
-
-0F 1A -> BNDLDX bnd, m
-
-F3 0F 1B -> BNDMK bnd, m64
-
-66 0F 1A -> BNDMOV bnd, bnd/m128
-66 0F 1B -> BNDMOV bnd/m128, bnd
-
-0F 1B -> BNDSTX m, bnd
 
 0F BC -> BSF r16|32|64, r/m16|32|64
 0F BD -> BSR r16|32|64, r/m16|32|64
@@ -132,20 +72,12 @@ FF /3 -> CALL m
 F8 -> CLC
 FC -> CLD
 
-0F 1C /0 -> CLDEMOTE m8
-
 0F AE /7 -> CLFLUSH m8
 66 0F AE /7 -> CLFLUSHOPT m8
 
 FA -> CLI
 
-F3 0F AE /6 -> CLRSSBSY m64
-
 0F 06 -> CLTS
-
-F3 0F 01 EE -> CLUI
-
-66 0F AE /6 -> CLWB m8
 
 F5 -> CMC
 
@@ -179,17 +111,11 @@ F5 -> CMC
 3A -> CMP r8, r/m8
 3B -> CMP r16|32|64, r/m16|32|64
 
-66 0F C2 -> CMPPD xmm, xmm/m128, imm8
-0F C2 -> CMPPS xmm, xmm/m128, imm8
-
 A6 -> CMPSB
 
 66 A7 -> CMPSW
 A7 -> CMPSD
 48 A7 -> CMPSQ
-
-F2 0F C2 -> CMPSD xmm, xmm/m64, imm8
-F3 0F C2 -> CMPSS xmm, xmm/m32, imm8
 
 0F B0 -> CMPXCHG r/m8, r8
 0F B1 -> CMPXCHG r/m8|16|32, r8|16|32
@@ -197,82 +123,24 @@ F3 0F C2 -> CMPSS xmm, xmm/m32, imm8
 0F C7 /1 -> CMPXCHG8B m64
 48 0F C7 /1 -> CMPXCHG16B m128
 
-66 0F 2F -> COMISD xmm, xmm/m64
-0F 2F -> COMISS xmm, xmm/m32
-
 0F A2 -> CPUID
 
 F2 0F 38 F0 -> CRC32 r32|64, r/m8
 F2 0F 38 F1 -> CRC32 r32|64, r/m16|32|64
 
-F3 0F E6 -> CVTDQ2PD xmm, xmm/m64
-0F 5B -> CVTDQ2PS xmm, xmm/m128
-F2 0F E6 -> CVTPD2DQ xmm, xmm/m128
-
-66 0F 2D -> CVTPD2PI mm, xmm/m128
-
-66 0F 5A -> CVTPD2PS xmm, xmm/m128
-66 0F 2A -> CVTPI2PD xmm, mm/m64
-
-0F 2A -> CVTPI2PS xmm, mm/m64
-66 0F 5B -> CVTPS2DQ xmm, xmm/m128
-
-0F 5A -> CVTPS2PD xmm, xmm/m64
-0F 2D -> CVTPS2PI mm, xmm/m64
-
-F2 0F 2D -> CVTSD2SI r32|64, xmm/m64
-F2 0F 5A -> CVTSD2SS xmm, xmm/m64
-
-F2 0F 2A -> CVTSI2SD xmm, r/m32|64
-F3 0F 2A -> CVTSI2SS xmm, r/m32|64
-
-F3 0F 5A -> CVTSS2SD xmm, xmm/m32
-
-F3 0F 2D -> CVTSS2SI r32|64, xmm/m32
-66 0F E6 -> CVTTPD2DQ xmm, xmm/m128
-
-66 0F 2C -> CVTTPD2PI mm, xmm/m128
-
-F3 0F 5B -> CVTTPS2DQ xmm, xmm/m128
-
-0F 2C -> CVTTPS2PI mm, xmm/m64
-
-F2 0F 2C -> CVTTSD2SI r32|64, xmm/m64
-F3 0F 2C -> CVTTSS2SI r32|64, xmm1/m32
-
 66 99 -> CWD
 99 -> CDQ
 48 99 -> CQO
 
-FE /1 -> r/m8
-FF /1 -> r/m16|32|64
+FE /1 -> DEC r/m8
+FF /1 -> DEC r/m16|32|64
 
 F6 /6 -> DIV r/m8
 F7 /6 -> DIV r/m16|32|64
 
-66 0F 5E -> DIVPD xmm, xmm/m128
-0F 5E -> DIVPS xmm, xmm/m128
-
-F2 0F 5E -> DIVSD xmm, xmm/m64
-F3 0F 5E -> DIVSS xmm, xmm/m32
-
-66 0F 3A 41 -> DPPD xmm, xmm/m128, imm8
-66 0F 3A 40 -> DPPS xmm, xmm/m128, imm8
-
 0F 77 -> EMMS
 
-F3 0F 38 FA -> ENCODEKEY128 r32, r32
-F3 0F 38 FB -> ENCODEKEY256 r32, r32
-
-F3 0F 1E FB -> ENDBR32
-F3 0F 1E FA -> ENDBR64
-
 C8 -> ENTER imm16, imm8
-
-F2 0F 38 F8 -> ENQCMD r32|64, m512
-F3 0F 38 F8 -> ENQCMDS r32|64, m512
-
-66 0F 3A 17 -> EXTRACTPS r/m32, xmm, imm8
 
 D9 F0 -> F2XM1
 D9 E1 -> FABS

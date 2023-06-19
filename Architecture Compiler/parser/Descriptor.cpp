@@ -8,6 +8,26 @@ Descriptor::Descriptor(const Token& token)
 	ParseOperands(token.GetOperands());
 }
 
+uint8_t Descriptor::GetUpperOperand() const
+{
+	return m_UpperOpperand;
+}
+
+const std::string& Descriptor::GetName() const
+{
+	return m_Name;
+}
+
+const std::vector<uint8_t>& Descriptor::GetBytes() const
+{
+	return m_Bytes;
+}
+
+const std::vector<DescriptorOperand>& Descriptor::GetOperands() const
+{
+	return m_Operands;
+}
+
 void Descriptor::ParseBytes(const std::vector<std::string>& bytes)
 {
 	for (std::string byte : bytes)

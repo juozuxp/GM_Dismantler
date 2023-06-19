@@ -1,0 +1,18 @@
+0F 58 -> ADDPS xmm, xmm/m128
+F3 0F 58 -> ADDSS xmm, xmm/m32
+
+0F 54 -> ANDPS xmm, xmm/m128
+0F 55 -> ANDNPS xmm, xmm/m128
+
+0F C2 -> CMPPS xmm, xmm/m128, imm8
+F3 0F C2 -> CMPSS xmm, xmm/m32, imm8
+
+0F 2F -> COMISS xmm, xmm/m32
+
+F3 0F 2A -> CVTSI2SS xmm, r/m32|64
+F3 0F 2D -> CVTSS2SI r32|64, xmm/m32
+
+F3 0F 2C -> CVTTSS2SI r32|64, xmm/m32
+
+0F 5E -> DIVPS xmm, xmm/m128
+F3 0F 5E -> DIVSS xmm, xmm/m32

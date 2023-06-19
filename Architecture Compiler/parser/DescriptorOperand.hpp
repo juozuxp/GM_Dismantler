@@ -10,7 +10,8 @@ public:
 		reg,
 		mem,
 		modrm,
-		imm
+		imm,
+		rel
 	};
 
 	enum class Register : uint8_t
@@ -22,32 +23,18 @@ public:
 		st
 	};
 
-public:
-	DescriptorOperand() = default;
-	DescriptorOperand(const std::vector<std::string>& variations);
-
-private:
-	bool ParseForMm(const std::string& variation);
-	bool ParseForSt(const std::string& variation);
-	bool ParseForXmm(const std::string& variation);
-	bool ParseForBnd(const std::string& variation);
-	void ParseForGeneral(const std::string& variation);
-
-	void ParseSize(const std::string_view& variation);
-
-private:
-	union
+	union TypeMask
 	{
 		struct
 		{
-			Type m_Type : 2;
-			Register m_Register : 6;
+			Type m_Type : 3;
+			Register m_Register : 5;
 		};
 
-		uint8_t m_TypeValue = 0;
+		uint8_t m_Value = 0;
 	};
 
-	union
+	union FlagMask
 	{
 		struct
 		{
@@ -56,10 +43,10 @@ private:
 			uint8_t m_RegisterIndex : 4;
 		};
 
-		uint8_t m_FlagsValue = 0;
+		uint8_t m_Value = 0;
 	};
 
-	union
+	union SizeMask
 	{
 		struct
 		{
@@ -72,7 +59,30 @@ private:
 			uint8_t m_Size512 : 1;
 		};
 
-		uint8_t m_SizeValue = 0;
+		uint8_t m_Value = 0;
 	};
+
+public:
+	DescriptorOperand() = default;
+	DescriptorOperand(const std::vector<std::string>& variations);
+
+public:
+	const TypeMask& GetTypeMask() const;
+	const SizeMask& GetSizeMask() const;
+	const FlagMask& GetFlagMask() const;
+
+private:
+	bool ParseForMm(const std::string& variation);
+	bool ParseForSt(const std::string& variation);
+	bool ParseForXmm(const std::string& variation);
+	bool ParseForBnd(const std::string& variation);
+	void ParseForGeneral(const std::string& variation);
+
+	void ParseSize(const std::string_view& variation);
+
+private:
+	TypeMask m_Type;
+	SizeMask m_Size;
+	FlagMask m_Flags;
 };
 

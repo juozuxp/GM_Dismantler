@@ -1,0 +1,12 @@
+F3 0F 1A -> BNDCL bnd, r/m64
+F2 0F 1A -> BNDCU bnd, r/m64
+F2 0F 1B -> BNDCN bnd, r/m64
+
+0F 1A -> BNDLDX bnd, m
+
+F3 0F 1B -> BNDMK bnd, m64
+
+66 0F 1A -> BNDMOV bnd, bnd/m128
+66 0F 1B -> BNDMOV bnd/m128, bnd
+
+0F 1B -> BNDSTX m, bnd

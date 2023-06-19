@@ -1,10 +1,21 @@
 #include "lexer/TokenSet.hpp"
 #include "parser/DescriptorSet.hpp"
+#include "compiler/InstructionSet.hpp"
+#include "packager/Packager.hpp"
+#include <filesystem>
 
 int main()
 {
-	std::ifstream file = std::ifstream("test.txt");
+	Packager package = Packager();
 
-	TokenSet tokens = TokenSet(file);
-	DescriptorSet descriptors = DescriptorSet(tokens);
+	for (std::filesystem::directory_entry file : std::filesystem::directory_iterator("architecture"))
+	{
+		if (file.path().extension() == L".asm64")
+		{
+			package.AddPackages(file.path().c_str());
+		}
+	}
+
+	// package.AddPackages("test.txt");
+	package.AssemblePackage().OutputToHeader("result.hpp");
 }
