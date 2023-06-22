@@ -2,7 +2,7 @@
 
 int main()
 {
-	uint8_t code[] = { 0xF3, 0x0F, 0x01, 0xEE };
+	uint8_t code[] = { 0x00, 0xFF };
 
 	Disassembler instance;
 

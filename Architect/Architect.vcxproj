@@ -131,12 +131,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\archIL.hpp" />
+    <ClInclude Include="include\ArchitectureIL.hpp" />
+    <ClInclude Include="include\ArraySize.hpp" />
     <ClInclude Include="include\x86_x64.hpp" />
     <ClInclude Include="include\Disassembler.hpp" />
+    <ClInclude Include="include\Visualizer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dissasembler\Disassembler.cpp" />
+    <ClCompile Include="visualizer\Visualizer.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -21,12 +21,21 @@
     <ClInclude Include="include\Disassembler.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\archIL.hpp">
+    <ClInclude Include="include\ArchitectureIL.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\ArraySize.hpp">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\Visualizer.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="dissasembler\Disassembler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="visualizer\Visualizer.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

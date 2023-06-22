@@ -19,8 +19,8 @@ public:
 	{
 		struct
 		{
-			Type m_Type : 2;
-			DescriptorOperand::Register m_Register : 6;
+			Type m_Type : 3;
+			DescriptorOperand::Register m_Register : 5;
 		};
 
 		struct
