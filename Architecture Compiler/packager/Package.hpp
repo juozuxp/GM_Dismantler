@@ -15,6 +15,7 @@ public:
 private:
 	std::string GetEnumTypes() const;
 	std::string GetArrayByteCode() const;
+	std::string GetArrayTypeStrings() const;
 
 private:
 	std::vector<uint8_t> m_ByteCode;

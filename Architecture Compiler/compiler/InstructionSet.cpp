@@ -47,7 +47,7 @@ std::vector<std::string> InstructionSet::GetTypes() const
 
 	types.resize(m_Types.size() + 1);
 
-	types[0] = "none";
+	types[0] = "invalid";
 	for (const std::pair<std::string, uint32_t>& type : m_Types)
 	{
 		types[type.second] = type.first;

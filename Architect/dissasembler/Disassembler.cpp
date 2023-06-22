@@ -210,7 +210,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 						else
 						{
 							resolved.m_Operands[i].m_Memory.m_Base = IL_INVALID_REGISTER;
-							resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const uint32_t*>(instruction + 2);
+							resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(instruction + 2);
 						}
 					}
 					else
@@ -221,12 +221,12 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				else if (mod == 1)
 				{
 					disp = 1;
-					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const uint8_t*>(instruction + 2);
+					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(instruction + 2);
 				}
 				else if (mod == 2)
 				{
 					disp = 4;
-					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const uint8_t*>(instruction + 2);
+					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(instruction + 2);
 				}
 
 				if (sib_index == 4)
@@ -246,18 +246,18 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				disp = 4;
 
 				resolved.m_Operands[i].m_Type = ILOperandType_MemoryRelative;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction + 2);
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction + 1);
 				break;
 			}
 			else if (mod == 1)
 			{
 				disp = 1;
-				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const uint8_t*>(instruction + 2);
+				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(instruction + 1);
 			}
 			else if (mod == 2)
 			{
 				disp = 4;
-				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const uint32_t*>(instruction + 2);
+				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(instruction + 1);
 			}
 
 			resolved.m_Operands[i].m_Memory.m_Base = mem + base_extend;
@@ -334,6 +334,13 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
 
 				instruction += 2;
+			}
+			else if (operand.m_Size64)
+			{
+				resolved.m_Operands[i].m_Type = ILOperandType_Value;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
+
+				instruction += 8;
 			}
 		} break;
 		case Operand_rel:

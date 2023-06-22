@@ -2,7 +2,7 @@
 
 enum Type
 {
-	Type_none,
+	Type_invalid,
 	Type_adcx,
 	Type_adox,
 	Type_aesdec,
@@ -170,7 +170,22 @@ enum Type
 	Type_fidiv,
 };
 
-static uint8_t Package[] = 
+constexpr static const char* TypeToName[] = 
+{
+	"invalid", "adcx", "adox", "aesdec", "aesenc", "aesdeclast", "aesenclast", "aesimc", "aeskeygenassist", "aesdec128kl", "aesdec256kl", "aesenc128kl", "aesenc256kl", "encodekey128", "encodekey256", "aesdecwide128kl",
+	"aesdecwide256kl", "aesencwide128kl", "aesencwide256kl", "endbr32", "endbr64", "clrssbsy", "cldemote", "clwb", "enqcmd", "enqcmds", "bndcl", "bndcu", "bndcn", "bndldx", "bndmk", "bndmov",
+	"bndstx", "addps", "addss", "andps", "andnps", "cmpps", "cmpss", "comiss", "cvtsi2ss", "cvtss2si", "cvttss2si", "divps", "divss", "addpd", "addsd", "andpd",
+	"andnpd", "cmppd", "cmpsd", "comisd", "cvtdq2pd", "cvtdq2ps", "cvtpd2dq", "cvtpd2pi", "cvtpd2ps", "cvtpi2pd", "cvtpi2ps", "cvtps2dq", "cvtps2pd", "cvtps2pi", "cvtsd2si", "cvtsd2ss",
+	"cvtsi2sd", "cvtss2sd", "cvttpd2dq", "cvttpd2pi", "cvttps2dq", "cvttps2pi", "cvttsd2si", "divpd", "divsd", "addsubpd", "addsubps", "blendpd", "blendps", "blendvpd", "blendvps", "dppd",
+	"dpps", "extractps", "clui	", "adc", "add", "and", "bsf", "bsr", "bswap", "bt", "btc", "btr", "bts", "call", "cbw", "cwde",
+	"cdqe", "clac", "clc", "cld", "clflush", "clflushopt", "cli", "clts", "cmc", "cmovo", "cmovno", "cmovb", "cmovae", "cmove", "cmovne", "cmovbe",
+	"cmova", "cmovs", "cmovns", "cmovp", "cmovnp", "cmovl", "cmovge", "cmovle", "cmovg", "cmp", "cmpsb", "cmpsw", "cmpsq", "cmpxchg", "cmpxchg8b", "cmpxchg16b",
+	"cpuid", "crc32", "cwd", "cdq", "cqo", "dec", "div", "emms", "enter", "f2xm1", "fabs", "fadd", "faddp", "fiadd", "fbld", "fbstp",
+	"fchs", "fclex", "fnclex", "fcmovb", "fcmove", "fcmovbe", "fcmovu", "fcmovnb", "fcmovne", "fcmovnbe", "fcmovnu", "fcom", "fcomp", "fcomi", "fcomip", "fucomi",
+	"fucomip", "fcos", "fdecstp", "fdiv", "fdivp", "fidiv"
+};
+
+constexpr static uint8_t Package[] = 
 {
 	0x02, 0x54, 0x00, 0x02, 0x00, 0x01, 0x01, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
 	0x54, 0x00, 0x02, 0x00, 0x0E, 0x01, 0x00, 0x0E, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0x54,

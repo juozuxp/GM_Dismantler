@@ -57,7 +57,7 @@ struct ILOperand
 			uint8_t m_Base; // register index, IL_INVALID_REGISTER - reserved for none
 			uint8_t m_Index; // register index, IL_INVALID_REGISTER - reserved for none
 
-			uint32_t m_Offset;
+			int32_t m_Offset;
 		} m_Memory; // ILOperandType_Memory
 		struct
 		{
@@ -78,7 +78,7 @@ struct ILOperand
 #pragma pack(push, 1)
 struct ILInstruction
 {
-	InstructionType m_Type = Instruction_none;
+	InstructionType m_Type = Instruction_invalid;
 	ILOperand m_Operands[4];
 };
 #pragma pack(pop)
