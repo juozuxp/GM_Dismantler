@@ -12,3 +12,36 @@ F2 0F F0 -> LDDQU xmm, m
 F2 0F 12 -> MOVDDUP xmm, xmm/m64
 F3 0F 16 -> MOVSHDUP xmm, xmm/m128
 F3 0F 12 -> MOVSLDUP xmm, xmm/m128
+
+66 0F 38 1C -> PABSB xmm, xmm/m128
+66 0F 38 1D -> PABSW xmm, xmm/m128
+66 0F 38 1E -> PABSD xmm, xmm/m128
+
+0F 38 1C -> PABSB mm, mm/m64
+0F 38 1D -> PABSW mm, mm/m64
+0F 38 1E -> PABSD mm, mm/m64
+
+0F 3A 0F -> PALIGNR mm, mm/m64, imm8
+66 0F 3A 0F -> PALIGNR xmm, xmm/m128, imm8
+
+0F 38 01 -> PHADDW mm, mm/m64
+0F 38 02 -> PHADDD mm, mm/m64
+0F 38 03 -> PHADDSW mm, mm/m64 
+
+66 0F 38 01 -> PHADDW xmm, xmm/m128
+66 0F 38 02 -> PHADDD xmm, xmm/m128
+66 0F 38 03 -> PHADDSW xmm, xmm/m128
+
+0F 38 05 -> PHSUBW mm, mm/m64
+0F 38 06 -> PHSUBD mm, mm/m64
+0F 38 07 -> PHSUBSW mm, mm/m64
+
+66 0F 38 05 -> PHSUBW xmm, xmm/m128
+66 0F 38 06 -> PHSUBD xmm, xmm/m128
+66 0F 38 07 -> PHSUBSW xmm, xmm/m128
+
+0F 38 04 -> PMADDUBSW mm, mm/m64
+66 0F 38 04 -> PMADDUBSW xmm, xmm/m128
+
+0F 38 0B -> PMULHRSW mm, mm/m64
+66 0F 38 0B -> PMULHRSW xmm, xmm/m128 

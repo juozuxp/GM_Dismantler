@@ -38,6 +38,16 @@ public:
 		base_128,
 	};
 
+	enum class Segments : uint8_t // Segment denotation, for the m_RegisterIndex
+	{
+		es,
+		cs,
+		ss,
+		ds,
+		fs,
+		gs
+	};
+
 #pragma pack(push, 1)
 	union TypeMask
 	{
@@ -70,8 +80,8 @@ public:
 			{
 				Size m_Size : 4;
 
-				uint8_t m_Size16 : 1;
-				uint8_t m_Size64 : 1;
+				uint8_t m_Size16 : 1; // if m_Size == Size::undefined, and m_Size64 is not set, the base defaults to m_Size16
+				uint8_t m_Size64 : 1; // if m_Size == Size::undefined, and m_Size16 is set, the base defaults to m_Size64
 				uint8_t m_Size256 : 1;
 				uint8_t m_Size512 : 1;
 			} m_Reg;
@@ -80,8 +90,8 @@ public:
 			{
 				Size m_Size : 4;
 
-				uint8_t m_Size16 : 1;
-				uint8_t m_Size64 : 1;
+				uint8_t m_Size16 : 1; // if m_Size == Size::undefined, and m_Size64 is not set, the base defaults to m_Size16
+				uint8_t m_Size64 : 1; // if m_Size == Size::undefined, and m_Size16 is set, the base defaults to m_Size64
 				uint8_t m_Size256 : 1;
 				uint8_t m_Size512 : 1;
 			} m_Mem;

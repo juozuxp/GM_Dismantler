@@ -551,3 +551,15 @@ EF -> OUT DX, AX|EAX
 6E -> OUTSB
 66 6F -> OUTSW
 6F -> OUTSD
+
+F3 90 -> PAUSE
+
+58 -> POP r16|64
+8F /0 -> POP r/m16|64
+
+0F A1 -> POP FS
+0F A9 -> POP GS
+
+F3 0F B8 -> POPCNT r16|32|64, r/m16|32|64
+
+9D -> POPF

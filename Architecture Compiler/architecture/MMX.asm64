@@ -3,3 +3,35 @@
 
 0F 6F -> MOVQ mm, mm/m64
 0F 7F -> MOVQ mm/m64, mm
+
+0F 63 -> PACKSSWB mm, mm/m64
+0F 6B -> PACKSSDW mm, mm/m64
+
+0F 67 -> PACKUSWB mm, mm/m64
+
+0F FC -> PADDB mm, mm/m64
+0F FD -> PADDW mm, mm/m64
+0F FE -> PADDD mm, mm/m64
+0F D4 -> PADDQ mm, mm/m64
+
+0F EC -> PADDSB mm, mm/m64
+0F ED -> PADDSW mm, mm/m64
+
+0F DC -> PADDUSB mm, mm/m64
+0F DD -> PADDUSW mm, mm/m64
+
+0F DB -> PAND mm, mm/m64
+0F DF -> PANDN mm, mm/m64
+
+0F 74 -> PCMPEQB mm, mm/m64
+0F 75 -> PCMPEQW mm, mm/m64
+0F 76 -> PCMPEQD mm, mm/m64
+
+0F 64 -> PCMPGTB mm, mm/m64
+0F 65 -> PCMPGTW mm, mm/m64
+0F 66 -> PCMPGTD mm, mm/m64
+
+0F F5 -> PMADDWD mm, mm/m64
+
+0F E5 -> PMULHW mm, mm/m64
+0F D5 -> PMULLW mm, mm/m64

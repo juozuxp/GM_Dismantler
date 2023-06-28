@@ -1,0 +1,6 @@
+66 0F 3A 61 -> PCMPESTRI xmm, xmm/m128, imm8
+66 0F 3A 60 -> PCMPESTRM xmm, xmm/m128, imm8
+66 0F 3A 62 -> PCMPISTRM xmm, xmm/m128, imm8
+66 0F 3A 63 -> PCMPISTRI xmm, xmm/m128, imm8
+
+66 0F 38 37 -> PCMPGTQ xmm, xmm/m128

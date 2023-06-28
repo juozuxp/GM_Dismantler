@@ -1,0 +1,1 @@
+66 0F 3A 44 -> PCLMULQDQ xmm, xmm/m128, imm8

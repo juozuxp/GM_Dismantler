@@ -54,3 +54,19 @@ F3 0F 11 -> MOVSS xmm/m32, xmm
 F3 0F 59 -> MULSS xmm, xmm/m32
 
 0F 56 -> ORPS xmm, xmm/m128
+
+0F E0 -> PAVGB mm, mm/m64
+0F E3 -> PAVGW mm, mm/m64
+
+0F C5 -> PEXTRW r32|64, mm, imm8
+0F C4 -> PINSRW mm, r32/m16, imm8
+
+0F EE -> PMAXSW mm, mm/m64
+0F DE -> PMAXUB mm, mm/m64
+
+0F EA -> PMINSW mm, mm/m64
+0F DA -> PMINUB mm, mm/m64
+
+0F D7 -> PMOVMSKB r32|64, mm
+
+0F E4 -> PMULHUW mm, mm/m64
