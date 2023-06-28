@@ -1,2 +1,14 @@
 66 0F D0 -> ADDSUBPD xmm, xmm/m128
 F2 0F D0 -> ADDSUBPS xmm, xmm/m128
+
+66 0F 7C -> HADDPD xmm, xmm/m128
+F2 0F 7C -> HADDPS xmm, xmm/m128
+
+66 0F 7D -> HSUBPD xmm, xmm/m128
+F2 0F 7D -> HSUBPS xmm, xmm/m128
+
+F2 0F F0 -> LDDQU xmm, m
+
+F2 0F 12 -> MOVDDUP xmm, xmm/m64
+F3 0F 16 -> MOVSHDUP xmm, xmm/m128
+F3 0F 12 -> MOVSLDUP xmm, xmm/m128

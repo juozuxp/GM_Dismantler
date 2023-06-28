@@ -40,3 +40,57 @@ F2 0F 2C -> CVTTSD2SI r32|64, xmm/m64
 
 66 0F 5E -> DIVPD xmm, xmm/m128
 F2 0F 5E -> DIVSD xmm, xmm/m64
+
+0F AE E8 -> LFENCE
+
+66 0F F7 -> MASKMOVDQU xmm, xmm
+
+66 0F 5F -> MAXPD xmm, xmm/m128
+F2 0F 5F -> MAXSD xmm, xmm/m64
+
+0F AE F0 -> MFENCE
+
+66 0F 5D -> MINPD xmm, xmm/m128
+F2 0F 5D -> MINSD xmm, xmm/m64
+
+66 0F 28 -> MOVAPD xmm, xmm/m128
+66 0F 29 -> MOVAPD xmm/m128, xmm
+
+66 0F 6E -> MOV xmm, r/m32|64
+66 0F 7E -> MOV r/m32|64, xmm
+
+66 0F 6F -> MOVDQA xmm, xmm/m128
+66 0F 7F -> MOVDQA xmm/m128, xmm
+
+F3 0F 6F -> MOVDQU xmm, xmm/m128
+F3 0F 7F -> MOVDQU xmm/m128, xmm
+
+F2 0F D6 -> MOVDQ2Q mm, xmm
+F3 0F D6 -> MOVQ2DQ xmm, mm
+
+66 0F 16 -> MOVHPD xmm, m64
+66 0F 17 -> MOVHPD m64, xmm1
+
+66 0F 12 -> MOVLPD xmm, m64
+66 0F 13 -> MOVLPD m64, xmm
+
+66 0F 50 -> MOVMSKPD r32|64, xmm
+
+66 0F E7 -> MOVNTDQ m128, xmm
+66 0F 2B -> MOVNTPD m128, xmm
+
+0F C3 -> MOVNTI m32|64, r32|64
+
+F3 0F 7E -> MOVQ xmm, xmm/m64
+66 0F D6 -> MOVQ xmm/m64, xmm
+
+F2 0F 10 -> MOVSD xmm, xmm/m64
+F2 0F 11 -> MOVSD xmm/m64, xmm
+
+66 0F 10 -> MOVUPD xmm, xmm/m128
+66 0F 11 -> MOVUPD xmm/m128, xmm
+
+66 0F 59 -> MULPD xmm, xmm/m128
+F2 0F 59 -> MULSD xmm, xmm/m64
+
+66 0F 56 -> ORPD xmm, xmm/m128

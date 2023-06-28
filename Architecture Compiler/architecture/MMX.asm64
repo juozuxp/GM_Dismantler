@@ -1,0 +1,5 @@
+0F 6E -> MOV mm, r/m32|64
+0F 7E -> MOV r/m32|64, mm
+
+0F 6F -> MOVQ mm, mm/m64
+0F 7F -> MOVQ mm/m64, mm

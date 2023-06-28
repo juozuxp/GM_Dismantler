@@ -14,4 +14,3 @@ public:
 private:
 	std::vector<Descriptor> m_Descriptors;
 };
-

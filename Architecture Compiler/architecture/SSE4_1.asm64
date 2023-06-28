@@ -8,3 +8,9 @@
 66 0F 3A 40 -> DPPS xmm, xmm/m128, imm8
 
 66 0F 3A 17 -> EXTRACTPS r/m32, xmm, imm8
+
+66 0F 3A 21 -> INSERTPS xmm, xmm/m32, imm8
+
+66 0F 38 2A -> MOVNTDQA xmm, m128
+
+66 0F 3A 42 -> MPSADBW xmm, xmm/m128, imm8

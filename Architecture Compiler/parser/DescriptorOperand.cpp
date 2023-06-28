@@ -1,5 +1,6 @@
 #include "DescriptorOperand.hpp"
 #include "tools/ArraySize.h"
+#include <math.h>
 
 DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 {
@@ -31,6 +32,21 @@ DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 				continue;
 			}
 
+			if (ParseForSreg(variation))
+			{
+				continue;
+			}
+
+			if (ParseForCr(variation))
+			{
+				continue;
+			}
+
+			if (ParseForDr(variation))
+			{
+				continue;
+			}
+
 			ParseForGeneral(variation);
 			continue;
 		}
@@ -57,8 +73,29 @@ DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 		{
 			ParseForSt(variation);
 		} break;
+		case Register::sreg:
+		{
+			ParseForSreg(variation);
+		} break;
+		case Register::cr:
+		{
+			ParseForCr(variation);
+		} break;
+		case Register::dr:
+		{
+			ParseForDr(variation);
+		} break;
 		}
 	}
+
+	_ASSERT(m_Size.m_Reg.m_Size != Size::undefined || (!(m_Size.m_Reg.m_Size16 && m_Size.m_Reg.m_Size64) || !(m_Size.m_Reg.m_Size256 && m_Size.m_Reg.m_Size512)));
+	_ASSERT(m_Size.m_Mem.m_Size != Size::undefined || (!(m_Size.m_Mem.m_Size16 && m_Size.m_Mem.m_Size64) || !(m_Size.m_Mem.m_Size256 && m_Size.m_Mem.m_Size512)));
+
+	_ASSERT(m_Size.m_Reg.m_Size != Size::undefined || ((!(m_Size.m_Reg.m_Size16 || m_Size.m_Reg.m_Size64) && (m_Size.m_Reg.m_Size256 || m_Size.m_Reg.m_Size512)) || ((m_Size.m_Reg.m_Size16 || m_Size.m_Reg.m_Size64) && !(m_Size.m_Reg.m_Size256 || m_Size.m_Reg.m_Size512)) || (!m_Size.m_Reg.m_Size16 && !m_Size.m_Reg.m_Size64 && !m_Size.m_Reg.m_Size256 && !m_Size.m_Reg.m_Size512)));
+	_ASSERT(m_Size.m_Mem.m_Size != Size::undefined || ((!(m_Size.m_Mem.m_Size16 || m_Size.m_Mem.m_Size64) && (m_Size.m_Mem.m_Size256 || m_Size.m_Mem.m_Size512)) || ((m_Size.m_Mem.m_Size16 || m_Size.m_Mem.m_Size64) && !(m_Size.m_Mem.m_Size256 || m_Size.m_Mem.m_Size512)) || (!m_Size.m_Mem.m_Size16 && !m_Size.m_Mem.m_Size64 && !m_Size.m_Mem.m_Size256 && !m_Size.m_Mem.m_Size512)));
+
+	_ASSERT(m_Size.m_Reg.m_Size == Size::undefined || (m_Size.m_Reg.m_Size == Size::base_32 && !m_Size.m_Reg.m_Size256 && !m_Size.m_Reg.m_Size512) || (m_Size.m_Reg.m_Size == Size::base_128 && !m_Size.m_Reg.m_Size16 && !m_Size.m_Reg.m_Size64) || ((m_Size.m_Reg.m_Size == Size::base_8 || m_Size.m_Reg.m_Size == Size::base_80) && !m_Size.m_Reg.m_Size16 && !m_Size.m_Reg.m_Size64 && !m_Size.m_Reg.m_Size256 && !m_Size.m_Reg.m_Size512));
+	_ASSERT(m_Size.m_Mem.m_Size == Size::undefined || ((m_Size.m_Mem.m_Size == Size::base_32 || m_Size.m_Mem.m_Size == Size::far_32) && !m_Size.m_Mem.m_Size256 && !m_Size.m_Mem.m_Size512) || (m_Size.m_Mem.m_Size == Size::base_128 && !m_Size.m_Mem.m_Size16 && !m_Size.m_Mem.m_Size64) || ((m_Size.m_Mem.m_Size == Size::base_8 || m_Size.m_Mem.m_Size == Size::base_80) && !m_Size.m_Mem.m_Size16 && !m_Size.m_Mem.m_Size64 && !m_Size.m_Mem.m_Size256 && !m_Size.m_Mem.m_Size512));
 }
 
 const DescriptorOperand::TypeMask& DescriptorOperand::GetTypeMask() const
@@ -76,7 +113,7 @@ const DescriptorOperand::FlagMask& DescriptorOperand::GetFlagMask() const
 	return m_Flags;
 }
 
-bool DescriptorOperand::ParseForMm(const std::string& variation)
+bool DescriptorOperand::ParseForMm(const std::string_view& variation)
 {
 	if (m_Type.m_Register != Register::mm)
 	{
@@ -85,7 +122,7 @@ bool DescriptorOperand::ParseForMm(const std::string& variation)
 			return false;
 		}
 
-		if (strncmp(variation.c_str(), "mm", 2))
+		if (strncmp(variation.data(), "mm", 2))
 		{
 			return false;
 		}
@@ -98,17 +135,18 @@ bool DescriptorOperand::ParseForMm(const std::string& variation)
 			}
 		}
 
-		m_Size.m_Size64 = true;
-		m_Type.m_Type = Type::reg;
 		m_Type.m_Register = Register::mm;
 	}
 
 	if (variation.size() >= 3)
 	{
-		if (!strncmp(variation.c_str(), "mm", 2))
+		if (!strncmp(variation.data(), "mm", 2))
 		{
 			if (variation[2] >= '0' && variation[2] <= '9')
 			{
+				m_Type.m_Type = Type::reg;
+				m_Size.m_Reg.m_Size64 = true;
+
 				m_Flags.m_Constant = true;
 				m_Flags.m_RegisterIndex = variation[2] - '0';
 				return true;
@@ -117,9 +155,9 @@ bool DescriptorOperand::ParseForMm(const std::string& variation)
 			{
 				if (variation.size() >= 4)
 				{
-					if (!strncmp(variation.c_str() + 2, "/m", 2))
+					if (!strncmp(variation.data() + 2, "/m", 2))
 					{
-						ParseSize(variation.c_str() + 4);
+						ParseSize(variation.data() + 4);
 
 						m_Type.m_Type = Type::modrm;
 						return true;
@@ -128,11 +166,18 @@ bool DescriptorOperand::ParseForMm(const std::string& variation)
 			}
 		}
 	}
+	else
+	{
+		_ASSERT(m_Type.m_Type == Type::none);
+
+		m_Type.m_Type = Type::reg;
+		m_Size.m_Reg.m_Size64 = true;
+	}
 
 	return true;
 }
 
-bool DescriptorOperand::ParseForSt(const std::string& variation)
+bool DescriptorOperand::ParseForSt(const std::string_view& variation)
 {
 	if (m_Type.m_Register != Register::st)
 	{
@@ -141,7 +186,7 @@ bool DescriptorOperand::ParseForSt(const std::string& variation)
 			return false;
 		}
 
-		if (strncmp(variation.c_str(), "st", 2))
+		if (strncmp(variation.data(), "st", 2))
 		{
 			return false;
 		}
@@ -154,18 +199,20 @@ bool DescriptorOperand::ParseForSt(const std::string& variation)
 			}
 		}
 
-		m_Type.m_Type = Type::reg;
 		m_Type.m_Register = Register::st;
 	}
 
 	if (variation.size() >= 4)
 	{
-		if (!strncmp(variation.c_str(), "st", 2))
+		if (!strncmp(variation.data(), "st", 2))
 		{
 			if (variation[2] == '(')
 			{
 				if (variation[3] >= '0' && variation[3] <= '9')
 				{
+					m_Type.m_Type = Type::reg;
+					m_Size.m_Reg.m_Size = Size::base_80;
+
 					m_Flags.m_Constant = true;
 					m_Flags.m_RegisterIndex = variation[3] - '0';
 					return true;
@@ -173,9 +220,9 @@ bool DescriptorOperand::ParseForSt(const std::string& variation)
 			}
 			else
 			{
-				if (!strncmp(variation.c_str() + 2, "/m", 2))
+				if (!strncmp(variation.data() + 2, "/m", 2))
 				{
-					ParseSize(variation.c_str() + 4);
+					ParseSize(variation.data() + 4);
 
 					m_Type.m_Type = Type::modrm;
 					return true;
@@ -183,11 +230,62 @@ bool DescriptorOperand::ParseForSt(const std::string& variation)
 			}
 		}
 	}
+	else
+	{
+		_ASSERT(m_Type.m_Type == Type::none);
+
+		m_Type.m_Type = Type::reg;
+		m_Size.m_Reg.m_Size = Size::base_80;
+	}
 
 	return true;
 }
 
-bool DescriptorOperand::ParseForXmm(const std::string& variation)
+bool DescriptorOperand::ParseForCr(const std::string_view& variation)
+{
+	if (m_Type.m_Register != Register::cr)
+	{
+		if (variation.size() < 2)
+		{
+			return false;
+		}
+
+		if (strncmp(variation.data(), "cr", 2))
+		{
+			return false;
+		}
+
+		m_Type.m_Type = Type::reg;
+		m_Size.m_Reg.m_Size64 = true;
+		m_Type.m_Register = Register::cr;
+	}
+
+	return true;
+}
+
+bool DescriptorOperand::ParseForDr(const std::string_view& variation)
+{
+	if (m_Type.m_Register != Register::dr)
+	{
+		if (variation.size() < 2)
+		{
+			return false;
+		}
+
+		if (strncmp(variation.data(), "dr", 2))
+		{
+			return false;
+		}
+
+		m_Type.m_Type = Type::reg;
+		m_Size.m_Reg.m_Size64 = true;
+		m_Type.m_Register = Register::dr;
+	}
+
+	return true;
+}
+
+bool DescriptorOperand::ParseForXmm(const std::string_view& variation)
 {
 	if (m_Type.m_Register != Register::xmm)
 	{
@@ -196,7 +294,7 @@ bool DescriptorOperand::ParseForXmm(const std::string& variation)
 			return false;
 		}
 
-		if (strncmp(variation.c_str(), "xmm", 3))
+		if (strncmp(variation.data(), "xmm", 3))
 		{
 			return false;
 		}
@@ -209,17 +307,18 @@ bool DescriptorOperand::ParseForXmm(const std::string& variation)
 			}
 		}
 
-		m_Size.m_Size128 = true;
-		m_Type.m_Type = Type::reg;
 		m_Type.m_Register = Register::xmm;
 	}
 
 	if (variation.size() >= 4)
 	{
-		if (!strncmp(variation.c_str(), "xmm", 3))
+		if (!strncmp(variation.data(), "xmm", 3))
 		{
 			if (variation[3] >= '0' && variation[3] <= '9')
 			{
+				m_Type.m_Type = Type::reg;
+				m_Size.m_Reg.m_Size = Size::base_128;
+
 				m_Flags.m_Constant = true;
 				m_Flags.m_RegisterIndex = variation[3] - '0';
 				return true;
@@ -228,9 +327,9 @@ bool DescriptorOperand::ParseForXmm(const std::string& variation)
 			{
 				if (variation.size() >= 5)
 				{
-					if (!strncmp(variation.c_str() + 3, "/m", 2))
+					if (!strncmp(variation.data() + 3, "/m", 2))
 					{
-						ParseSize(variation.c_str() + 5);
+						ParseSize(variation.data() + 5);
 
 						m_Type.m_Type = Type::modrm;
 						return true;
@@ -239,11 +338,18 @@ bool DescriptorOperand::ParseForXmm(const std::string& variation)
 			}
 		}
 	}
+	else
+	{
+		_ASSERT(m_Type.m_Type == Type::none);
+
+		m_Type.m_Type = Type::reg;
+		m_Size.m_Reg.m_Size = Size::base_128;
+	}
 
 	return true;
 }
 
-bool DescriptorOperand::ParseForBnd(const std::string& variation)
+bool DescriptorOperand::ParseForBnd(const std::string_view& variation)
 {
 	if (m_Type.m_Register != Register::bnd)
 	{
@@ -252,7 +358,7 @@ bool DescriptorOperand::ParseForBnd(const std::string& variation)
 			return false;
 		}
 
-		if (strncmp(variation.c_str(), "bnd", 3))
+		if (strncmp(variation.data(), "bnd", 3))
 		{
 			return false;
 		}
@@ -265,32 +371,67 @@ bool DescriptorOperand::ParseForBnd(const std::string& variation)
 			}
 		}
 
-		m_Type.m_Type = Type::reg;
 		m_Type.m_Register = Register::bnd;
 	}
 
 	if (variation.size() >= 5)
 	{
-		if (!strncmp(variation.c_str(), "bnd/m", 5))
+		if (!strncmp(variation.data(), "bnd/m", 5))
 		{
-			ParseSize(variation.c_str() + 5);
+			ParseSize(variation.data() + 5);
 
 			m_Type.m_Type = Type::modrm;
 			return true;
 		}
 	}
+	else
+	{
+		_ASSERT(m_Type.m_Type == Type::none);
+
+		m_Type.m_Type = Type::reg;
+		m_Size.m_Reg.m_Size = Size::base_128;
+	}
 
 	return true;
 }
 
-void DescriptorOperand::ParseForGeneral(const std::string& variation)
+bool DescriptorOperand::ParseForSreg(const std::string_view& variation)
+{
+	if (m_Type.m_Register != Register::sreg)
+	{
+		if (variation.size() < 4)
+		{
+			return false;
+		}
+
+		if (strncmp(variation.data(), "sreg", 3))
+		{
+			return false;
+		}
+
+		m_Type.m_Type = Type::reg;
+		m_Type.m_Register = Register::sreg;
+		m_Size.m_Reg.m_Size = Size::base_32;
+	}
+
+	return true;
+}
+
+void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 {
 	constexpr const char* upperRegisters[] = { "ax", "cx", "dx", "bx", "sp", "bp", "si", "di" };
 	constexpr const char* lowerRegisters[] = { "al", "cl", "dl", "bl", "ah", "ch", "dh", "bh" };
 
 	if (variation[0] >= '0' && variation[0] <= '9')
 	{
-		ParseSize(variation.c_str());
+		uint8_t offset = ParseSize(variation.data());
+		if (variation.size() != offset)
+		{
+			if (variation[offset] == '/')
+			{
+				ParseForGeneral(variation.data() + offset + 1);
+			}
+		}
 		return;
 	}
 
@@ -309,30 +450,42 @@ void DescriptorOperand::ParseForGeneral(const std::string& variation)
 		if (variation[1] != '/' && variation[1] != 'e' && (variation[1] < '0' || variation[1] > '9'))
 		{
 			cursor = 1;
-
-			m_Size.m_Size64 = true;
+			m_Size.m_Reg.m_Size64 = true;
 		}
 		else
 		{
 			if (variation.size() >= 3)
 			{
-				if (!strncmp(variation.c_str() + 1, "/m", 2))
+				if (!strncmp(variation.data() + 1, "/m", 2))
 				{
 					m_Type.m_Type = Type::modrm;
 
-					ParseSize(variation.c_str() + 3);
+					ParseSize(variation.data() + 3);
 					return;
 				}
-				else if (!strncmp(variation.c_str() + 1, "el", 2))
+				else if (!strncmp(variation.data() + 1, "el", 2))
 				{
 					m_Type.m_Type = Type::rel;
 					
-					ParseSize(variation.c_str() + 3);
+					ParseSize(variation.data() + 3);
+					return;
+				}
+				else if (!strncmp(variation.data() + 1, "ex", 2))
+				{
+					m_Flags.m_Rex = true;
 					return;
 				}
 			}
 
-			ParseSize(variation.c_str() + 1);
+			uint8_t offset = ParseSize(variation.data() + 1) + 1;
+			if (variation.size() != offset)
+			{
+				if (variation[offset] == '/')
+				{
+					ParseForGeneral(variation.data() + offset + 1);
+				}
+			}
+
 			return;
 		}
 	}
@@ -340,30 +493,58 @@ void DescriptorOperand::ParseForGeneral(const std::string& variation)
 	{
 		if (variation[0] == 'e')
 		{
-			m_Size.m_Size32 = true;
+			cursor = 1;
+			m_Size.m_Reg.m_Size = Size::base_32;
 		}
 		else
 		{
 			if (variation[0] == 'm')
 			{
-				m_Type.m_Type = Type::mem;
+				if (m_Type.m_Type == Type::reg)
+				{
+					m_IsSeparateSize = true;
+					m_Type.m_Type = Type::modrm;
+				}
+				else
+				{
+					m_Type.m_Type = Type::mem;
+				}
 
 				if (variation.size() == 1)
 				{
 					return;
 				}
 
-				ParseSize(variation.c_str() + 1);
+				if (variation[1] == 'o')
+				{
+					if (variation.size() < 5)
+					{
+						return;
+					}
+
+					if (strncmp(variation.data(), "moffs", 5))
+					{
+						return;
+					}
+
+					m_Type.m_Type = Type::moffs;
+
+					ParseSize(variation.data() + 5);
+					return;
+				}
+
+				ParseSize(variation.data() + 1);
+				return;
 			}
 			else
 			{
 				if (variation.size() >= 3)
 				{
-					if (!strncmp(variation.c_str(), "imm", 3))
+					if (!strncmp(variation.data(), "imm", 3))
 					{
 						m_Type.m_Type = Type::imm;
 
-						ParseSize(variation.c_str() + 3);
+						ParseSize(variation.data() + 3);
 						return;
 					}
 				}
@@ -378,13 +559,14 @@ void DescriptorOperand::ParseForGeneral(const std::string& variation)
 
 	for (uint8_t i = 0; i < ARRAY_SIZE(upperRegisters); i++)
 	{
-		if (!strncmp(variation.c_str() + cursor, upperRegisters[i], 2))
+		if (!strncmp(variation.data() + cursor, upperRegisters[i], 2))
 		{
 			if (cursor == 0)
 			{
-				m_Size.m_Size16 = true;
+				m_Size.m_Reg.m_Size16 = true;
 			}
 
+			m_Type.m_Type = Type::reg;
 			m_Flags.m_Constant = true;
 			m_Flags.m_RegisterIndex = i;
 			return;
@@ -398,9 +580,11 @@ void DescriptorOperand::ParseForGeneral(const std::string& variation)
 
 	for (uint8_t i = 0; i < ARRAY_SIZE(lowerRegisters); i++)
 	{
-		if (!strncmp(variation.c_str(), lowerRegisters[i], 2))
+		if (!strncmp(variation.data(), lowerRegisters[i], 2))
 		{
-			m_Size.m_Size8 = true;
+			m_Type.m_Type = Type::reg;
+			m_Size.m_Reg.m_Size = Size::base_8;
+
 			m_Flags.m_Constant = true;
 			m_Flags.m_RegisterIndex = i;
 			return;
@@ -408,42 +592,136 @@ void DescriptorOperand::ParseForGeneral(const std::string& variation)
 	}
 }
 
-void DescriptorOperand::ParseSize(const std::string_view& variation)
+uint8_t DescriptorOperand::ParseSize(const std::string_view& variation)
 {
 	if (variation.empty())
 	{
-		return;
+		return 0;
 	}
 
-	switch (atoi(variation.data()))
+	uint32_t size = atoi(variation.data());
+	if (m_Type.m_Type == Type::mem)
 	{
-	case 8:
-	{
-		m_Size.m_Size8 = true;
-	} break;
-	case 16:
-	{
-		m_Size.m_Size16 = true;
-	} break;
-	case 32:
-	{
-		m_Size.m_Size32 = true;
-	} break;
-	case 64:
-	{
-		m_Size.m_Size64 = true;
-	} break;
-	case 128:
-	{
-		m_Size.m_Size128 = true;
-	} break;
-	case 256:
-	{
-		m_Size.m_Size256 = true;
-	} break;
-	case 512:
-	{
-		m_Size.m_Size512 = true;
-	} break;
+		uint8_t offset = 0;
+
+		if (size == 16 && variation.size() > 2 && variation[2] == ':')
+		{
+			offset = 3;
+
+			size = atoi(variation.data() + 3);
+			m_Size.m_Mem.m_Size = Size::far_32;
+		}
+
+		if (m_Size.m_Mem.m_Size == Size::far_32)
+		{
+			switch (size)
+			{
+			case 16:
+			{
+				m_Size.m_Mem.m_Size16 = true;
+			} break;
+			case 32:
+			{
+			} break;
+			case 64:
+			{
+				m_Size.m_Mem.m_Size64 = true;
+			} break;
+			default:
+			{
+				_ASSERT(false);
+			} break;
+			}
+
+			return (size == 0 ? 0 : floor(log10(size)) + 1) + offset;
+		}
 	}
+
+	if (m_Type.m_Type == Type::reg || (m_Type.m_Type == Type::modrm && !m_IsSeparateSize))
+	{
+		switch (size)
+		{
+		case 8:
+		{
+			m_Size.m_Reg.m_Size = Size::base_8;
+		} break;
+		case 16:
+		{
+			m_Size.m_Reg.m_Size16 = true;
+		} break;
+		case 32:
+		{
+			m_Size.m_Reg.m_Size = Size::base_32;
+		} break;
+		case 64:
+		{
+			m_Size.m_Reg.m_Size64 = true;
+		} break;
+		case 80:
+		{
+			m_Size.m_Reg.m_Size = Size::base_80;
+		} break;
+		case 128:
+		{
+			m_Size.m_Reg.m_Size = Size::base_128;
+		} break;
+		case 256:
+		{
+			m_Size.m_Reg.m_Size256 = true;
+		} break;
+		case 512:
+		{
+			m_Size.m_Reg.m_Size512 = true;
+		} break;
+		default:
+		{
+			_ASSERT(false);
+		} break;
+		}
+	}
+
+	if (m_Type.m_Type != Type::reg)
+	{
+		switch (size)
+		{
+		case 8:
+		{
+			m_Size.m_Mem.m_Size = Size::base_8;
+		} break;
+		case 16:
+		{
+			m_Size.m_Mem.m_Size16 = true;
+		} break;
+		case 32:
+		{
+			m_Size.m_Mem.m_Size = Size::base_32;
+		} break;
+		case 64:
+		{
+			m_Size.m_Mem.m_Size64 = true;
+		} break;
+		case 80:
+		{
+			m_Size.m_Mem.m_Size = Size::base_80;
+		} break;
+		case 128:
+		{
+			m_Size.m_Mem.m_Size = Size::base_128;
+		} break;
+		case 256:
+		{
+			m_Size.m_Mem.m_Size256 = true;
+		} break;
+		case 512:
+		{
+			m_Size.m_Mem.m_Size512 = true;
+		} break;
+		default:
+		{
+			_ASSERT(false);
+		} break;
+		}
+	}
+
+	return size == 0 ? 0 : floor(log10(size)) + 1;
 }

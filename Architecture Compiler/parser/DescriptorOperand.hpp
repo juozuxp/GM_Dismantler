@@ -7,11 +7,13 @@ class DescriptorOperand
 public:
 	enum class Type : uint8_t
 	{
+		none,
 		reg,
 		mem,
 		modrm,
 		imm,
-		rel
+		rel,
+		moffs
 	};
 
 	enum class Register : uint8_t
@@ -20,9 +22,23 @@ public:
 		xmm,
 		mm,
 		bnd,
-		st
+		st,
+		sreg,
+		cr,
+		dr
 	};
 
+	enum class Size : uint8_t
+	{
+		undefined,
+		base_8,
+		far_32,
+		base_32,
+		base_80,
+		base_128,
+	};
+
+#pragma pack(push, 1)
 	union TypeMask
 	{
 		struct
@@ -50,17 +66,30 @@ public:
 	{
 		struct
 		{
-			uint8_t m_Size8 : 1;
-			uint8_t m_Size16 : 1;
-			uint8_t m_Size32 : 1;
-			uint8_t m_Size64 : 1;
-			uint8_t m_Size128 : 1;
-			uint8_t m_Size256 : 1;
-			uint8_t m_Size512 : 1;
+			struct
+			{
+				Size m_Size : 4;
+
+				uint8_t m_Size16 : 1;
+				uint8_t m_Size64 : 1;
+				uint8_t m_Size256 : 1;
+				uint8_t m_Size512 : 1;
+			} m_Reg;
+
+			struct
+			{
+				Size m_Size : 4;
+
+				uint8_t m_Size16 : 1;
+				uint8_t m_Size64 : 1;
+				uint8_t m_Size256 : 1;
+				uint8_t m_Size512 : 1;
+			} m_Mem;
 		};
 
-		uint8_t m_Value = 0;
+		uint16_t m_Value = 0;
 	};
+#pragma pack(pop)
 
 public:
 	DescriptorOperand() = default;
@@ -72,17 +101,21 @@ public:
 	const FlagMask& GetFlagMask() const;
 
 private:
-	bool ParseForMm(const std::string& variation);
-	bool ParseForSt(const std::string& variation);
-	bool ParseForXmm(const std::string& variation);
-	bool ParseForBnd(const std::string& variation);
-	void ParseForGeneral(const std::string& variation);
+	bool ParseForMm(const std::string_view& variation);
+	bool ParseForCr(const std::string_view& variation);
+	bool ParseForDr(const std::string_view& variation);
+	bool ParseForSt(const std::string_view& variation);
+	bool ParseForXmm(const std::string_view& variation);
+	bool ParseForBnd(const std::string_view& variation);
+	bool ParseForSreg(const std::string_view& variation);
+	void ParseForGeneral(const std::string_view& variation);
 
-	void ParseSize(const std::string_view& variation);
+	uint8_t ParseSize(const std::string_view& variation);
 
 private:
-	TypeMask m_Type;
-	SizeMask m_Size;
-	FlagMask m_Flags;
-};
+	TypeMask m_Type = {};
+	SizeMask m_Size = {};
+	FlagMask m_Flags = {};
 
+	bool m_IsSeparateSize = false;
+};

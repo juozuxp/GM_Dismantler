@@ -16,3 +16,41 @@ F3 0F 2C -> CVTTSS2SI r32|64, xmm/m32
 
 0F 5E -> DIVPS xmm, xmm/m128
 F3 0F 5E -> DIVSS xmm, xmm/m32
+
+0F AE /2 -> LDMXCSR m32
+
+0F 5F -> MAXPS xmm, xmm/m128
+F3 0F 5F -> MAXSS xmm, xmm/m32
+
+0F 5D -> MINPS xmm, xmm/m128
+F3 0F 5D -> MINSS xmm,xmm/m32
+
+0F F7 -> MASKMOVQ mm, mm
+
+0F 28 -> MOVAPS xmm, xmm/m128
+0F 29 -> MOVAPS xmm/m128, xmm
+
+0F 12 -> MOVHLPS xmm, xmm
+0F 16 -> MOVLHPS xmm, xmm
+
+0F 12 -> MOVLPS xmm, m64
+0F 13 -> MOVLPS m64, xmm
+
+0F 16 -> MOVHPS xmm, m64
+0F 17 -> MOVHPS m64, xmm
+
+0F 50 -> MOVMSKPS r32|64, xmm
+
+0F 2B -> MOVNTPS m128, xmm
+0F E7 -> MOVNTQ m64, mm
+
+F3 0F 10 -> MOVSS xmm, xmm/m32
+F3 0F 11 -> MOVSS xmm/m32, xmm
+
+0F 10 -> MOVUPS xmm, xmm/m128
+0F 11 -> MOVUPS xmm/m128, xmm
+
+0F 59 -> MULPS xmm, xmm/m128
+F3 0F 59 -> MULSS xmm, xmm/m32
+
+0F 56 -> ORPS xmm, xmm/m128

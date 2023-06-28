@@ -11,7 +11,8 @@ public:
 		reg,
 		modrm,
 		imm,
-		rel
+		rel,
+		moffs
 	};
 
 #pragma pack(push, 1)
@@ -32,14 +33,23 @@ public:
 
 		struct
 		{
-			uint8_t m_Size8 : 1;
+			DescriptorOperand::Size m_Size : 4;
+
 			uint8_t m_Size16 : 1;
-			uint8_t m_Size32 : 1;
 			uint8_t m_Size64 : 1;
-			uint8_t m_Size128 : 1;
 			uint8_t m_Size256 : 1;
 			uint8_t m_Size512 : 1;
-		};
+		} m_Reg;
+
+		struct
+		{
+			DescriptorOperand::Size m_Size : 4;
+
+			uint8_t m_Size16 : 1;
+			uint8_t m_Size64 : 1;
+			uint8_t m_Size256 : 1;
+			uint8_t m_Size512 : 1;
+		} m_Mem;
 	};
 #pragma pack(pop)
 

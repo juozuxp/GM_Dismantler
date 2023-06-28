@@ -61,7 +61,7 @@
 
 E8 -> CALL rel16|32
 FF /2 -> CALL r/m64
-FF /3 -> CALL m
+FF /3 -> CALL m16:16|32|64
 
 66 98 -> CBW
 98 -> CWDE
@@ -155,8 +155,8 @@ DE /0 -> FADDP ST, ST(0)
 DA /0 -> FIADD m32
 DE /0 -> FIADD m16
 
-DF /4 -> FBLD m
-DF /6 -> FBSTP m
+DF /4 -> FBLD m80
+DF /6 -> FBSTP m80
 
 D9 E0 -> FCHS
 
@@ -198,3 +198,356 @@ DE /7 -> FDIVP ST, ST(0)
 
 DA /6 -> FIDIV m32
 DE /6 -> FIDIV m16
+
+D8 /7 -> FDIVR m32
+DC /7 -> FDIVR m64
+
+D8 /7 -> FDIVR ST(0), ST
+DC /6 -> FDIVR ST, ST(0)
+DE /6 -> FDIVRP ST, ST(0)
+
+DA /7 -> FIDIVR m32
+DE /7 -> FIDIVR m16
+
+DD /0 -> FFREE ST
+
+DE /2 -> FICOM m16
+DA /2 -> FICOM m32
+
+DE /3 -> FICOMP m16
+DA /3 -> FICOMP m32
+
+DF /0 -> FILD m16
+DB /0 -> FILD m32
+DF /5 -> FILD m64
+
+D9 F7 -> FINCSTP
+
+9B DB E3 -> FINIT
+DB E3 -> FNINIT
+
+DF /2 -> FIST m16
+DB /2 -> FIST m32
+
+DF /3 -> FISTP m16
+DB /3 -> FISTP m32
+DF /7 -> FISTP m64
+
+DF /1 -> FISTTP m16
+DB /1 -> FISTTP m32
+DD /1 -> FISTTP m64
+
+D9 /0 -> FLD m32
+DD /0 -> FLD m64
+DB /5 -> FLD m80
+D9 /0 -> FLD ST
+
+D9 E8 -> FLD1
+D9 E9 -> FLDL2T
+D9 EA -> FLDL2E
+D9 EB -> FLDPI
+D9 EC -> FLDLG2
+D9 ED -> FLDLN2
+D9 EE -> FLDZ
+
+D9 /5 -> FLDCW m16
+D9 /4 -> FLDENV m
+
+D8 /1 -> FMUL m32
+DC /1 -> FMUL m64
+
+D8 /1 -> FMUL ST(0), ST
+DC /1 -> FMUL ST, ST(0)
+DE /1 -> FMULP ST, ST(0)
+
+DA /1 -> FIMUL m32
+DE /1 -> FIMUL m16
+
+D9 D0 -> FNOP
+
+D9 F3 -> FPATAN
+
+D9 F8 -> FPREM
+D9 F5 -> FPREM1
+
+D9 F2 -> FPTAN
+
+D9 FC -> FRNDINT
+
+DD /4 -> FRSTOR m
+
+9B DD /6 -> FSAVE m
+DD /6 -> FNSAVE m
+
+D9 FD -> FSCALE
+
+D9 FE -> FSIN
+D9 FB -> FSINCOS
+
+D9 FA -> FSQRT
+
+D9 /2 -> FST m32
+DD /2 -> FST m64
+DD /2 -> FST ST
+
+D9 /3 -> FSTP m32
+DD /3 -> FSTP m64
+DB /7 -> FSTP m80
+DD /3 -> FSTP ST
+
+9B D9 /7 -> FSTCW m16
+D9 /7 -> FNSTCW m16
+
+9B D9 /6 -> FSTENV m
+D9 /6 -> FNSTENV m
+
+9B DD /7 -> FSTSW m16
+9B DF E0 -> FSTSW AX
+
+DD /7 -> FNSTSW m16
+DF E0 -> FNSTSW AX
+
+D8 /4 -> FSUB m32
+DC /4 -> FSUB m64
+D8 /4 -> FSUB ST(0), ST
+DC /5 -> FSUB ST, ST(0)
+
+DE /5 -> FSUBP ST, ST(0)
+
+DA /4 -> FISUB m32
+DE /4 -> FISUB m16
+
+D8 /5 -> FSUBR m32
+DC /5 -> FSUBR m64
+D8 /5 -> FSUBR ST(0), ST
+DC /4 -> FSUBR ST, ST(0)
+DE /4 -> FSUBRP ST, ST(0)
+
+DA /5 -> FISUBR m32
+DE /5 -> FISUBR m16
+
+D9 E4 -> FTST
+
+DD /4 -> FUCOM ST
+DD /5 -> FUCOMP ST
+DA E9 -> FUCOMPP
+
+D9 E5 -> FXAM
+
+D9 /1 -> FXCH ST
+
+0F AE /1 -> FXRSTOR m
+48 0F AE /1 -> FXRSTOR64 m
+
+0F AE /0 -> FXSAVE m
+48 0F AE /0 -> FXSAVE64 m
+
+D9 F4 -> FXTRACT
+
+D9 F1 -> FYL2X
+D9 F9 -> FYL2XP1
+
+F4 -> HLT
+
+F6 /7 -> IDIV r/m8
+F7 /7 -> IDIV r/m16|32|64
+
+F6 /5 -> IMUL r/m8
+F7 /5 -> IMUL r/m16|32|64
+
+0F AF -> IMUL r16|32|64, r/m16|32|64
+
+6B -> IMUL r16|32|64, r/m16|32|64, imm8
+69 -> IMUL r16|32|64, r/m16|32|64, imm16
+
+E4 -> IN AL, imm8
+E5 -> IN AX|EAX, imm8
+
+EC -> IN AL, DX
+ED -> IN AX|EAX, DX
+
+FE /0 -> INC r/m8
+FF /0 -> INC r/m16|32|64
+
+6C -> INSB
+
+66 6D -> INSW
+6D -> INSD
+
+CC -> INT3
+CD -> INT imm8
+CE -> INTO
+F1 -> INT1
+
+0F 08 -> INVD
+
+0F 01 /7 -> INVLPG m
+
+66 CF -> IRET
+CF -> IRETD
+48 CF -> IRETQ
+
+70 -> JO rel8
+71 -> JNO rel8
+72 -> JB rel8
+73 -> JAE rel8
+74 -> JE rel8
+75 -> JNE rel8
+76 -> JBE rel8
+77 -> JA rel8
+78 -> JS rel8
+79 -> JNS rel8
+7A -> JPE rel8
+7B -> JPO rel8
+7C -> JL rel8
+7D -> JGE rel8
+7E -> JLE rel8
+7F -> JG rel8
+
+E3 -> JRCXZ rel8
+
+0F 80 -> JO rel32
+0F 81 -> JNO rel32
+0F 82 -> JB rel32
+0F 83 -> JAE rel32
+0F 84 -> JE rel32
+0F 85 -> JNE rel32
+0F 86 -> JBE rel32
+0F 87 -> JA rel32
+0F 88 -> JS rel32
+0F 89 -> JNS rel32
+0F 8A -> JPE rel32
+0F 8B -> JPO rel32
+0F 8C -> JL rel32
+0F 8D -> JGE rel32
+0F 8E -> JLE rel32
+0F 8F -> JG rel32
+
+EB -> JMP rel8
+E9 -> JMP rel32
+
+FF /4 -> JMP r/m64
+FF /5 -> JMP m16:16|32|64
+
+0F 02 -> LAR r16|32|64, r16/m16
+
+0F B2 -> LSS r16|32|64, m16:16|32|64
+0F B4 -> LFS r16|32|64, m16:16|32|64
+0F B5 -> LGS r16|32|64, m16:16|32|64
+
+8D -> LEA r16|32|64, m
+
+C9 -> LEAVE
+
+0F 01 /2 -> LGDT m
+0F 01 /3 -> LIDT m
+
+0F 00 /2 -> LLDT r/m16
+0F 01 /6 -> LMSW r/m16
+
+AC -> LODSB
+
+66 AD -> LODSW
+AD -> LODSD
+48 AD -> LODSQ
+
+E2 -> LOOP rel8
+E1 -> LOOPE rel8
+E0 -> LOOPNE rel8
+
+0F 03 -> LSL r16|32|64, r16|32/m16
+
+0F 00 /3 -> LTR r16|32|64/m16
+
+0F 01 C8 -> MONITOR
+
+88 -> MOV r/m8, r8
+89 -> MOV r/m16|32|64, r16|32|64
+
+8A -> MOV r8, r/m8
+8B -> MOV r16|32|64, r/m16|32|64
+
+8C -> MOV r/m16, Sreg
+8E -> MOV Sreg, r/m16
+
+A0 -> MOV AL, moffs8
+A1 -> MOV AX|EAX|RAX, moffs16|32|64
+
+A2 -> MOV moffs8, AL
+A3 -> MOV moffs16|32|64, AX|EAX|RAX
+
+B0 -> MOV AL|REX, imm8
+B1 -> MOV CL|REX, imm8
+B2 -> MOV DL|REX, imm8
+B3 -> MOV BL|REX, imm8
+B4 -> MOV AH|REX, imm8
+B5 -> MOV CH|REX, imm8
+B6 -> MOV DH|REX, imm8
+B7 -> MOV BH|REX, imm8
+
+B8 -> MOV AX|EAX|RAX|REX, imm16|32|64
+B9 -> MOV CX|ECX|RCX|REX, imm16|32|64
+BA -> MOV DX|EDX|RDX|REX, imm16|32|64
+BB -> MOV BX|EBX|RBX|REX, imm16|32|64
+BC -> MOV SP|ESP|RSP|REX, imm16|32|64
+BD -> MOV BP|EBP|RBP|REX, imm16|32|64
+BE -> MOV SI|ESI|RSI|REX, imm16|32|64
+BF -> MOV DI|EDI|RDI|REX, imm16|32|64
+
+C6 /0 -> MOV r/m8, imm8
+C7 /0 -> MOV r/m16|32|64, imm16|32|64
+
+0F 20 -> MOV r64, cr
+0F 22 -> MOV cr, r64
+
+0F 21 -> MOV r64, dr
+0F 23 -> MOV dr, r64
+
+A4 -> MOVSB
+66 A5 -> MOVSW
+A5 -> MOVSD
+48 A5 -> MOVSQ
+
+0F BE -> MOVSX r16|32|64, r/m8
+0F BF -> MOVSX r32|64, r/m16
+
+63 -> MOVSXD r16|32|64, r/m16|32
+
+0F B6 -> MOVZX r16|32|64, r/m8
+0F B7 -> MOVZX r32|64, r/m16
+
+F6 /4 -> MUL r/m8
+F7 /4 -> MUL r/m16|32|64
+
+0F 01 C9 -> MWAIT
+
+F6 /3 -> NEG r/m8
+F7 /3 -> NEG r/m16|32|64
+
+90 -> NOP
+0F 1F /0 -> NOP r/m16|32
+
+F6 /2 -> NOT r/m8
+F7 /2 -> NOT r/m16|32|64
+
+08 -> OR r/m8, r8
+09 -> OR r/m16|32|64, r16|32|64
+0A -> OR r8, r/m8
+0B -> OR r16|32|64, r/m16|32|64
+
+0C -> OR AL, imm8
+0D -> OR AX|EAX|RAX, imm16|32
+
+80 /1 -> OR r/m8, imm8
+81 /1 -> OR r/m16|32|64, imm16|32
+83 /1 -> OR r/m16|32|64, imm8
+
+E6 -> OUT imm8, AL
+E7 -> OUT imm8, AX|EAX
+
+EE -> OUT DX, AL
+EF -> OUT DX, AX|EAX
+
+6E -> OUTSB
+66 6F -> OUTSW
+6F -> OUTSD

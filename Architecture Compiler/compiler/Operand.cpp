@@ -12,6 +12,7 @@ Operand::Operand(const DescriptorOperand& descriptor)
 		map[DescriptorOperand::Type::modrm] = Type::modrm;
 		map[DescriptorOperand::Type::imm] = Type::imm;
 		map[DescriptorOperand::Type::rel] = Type::rel;
+		map[DescriptorOperand::Type::moffs] = Type::moffs;
 
 		return map;
 	}();
@@ -27,13 +28,17 @@ Operand::Operand(const DescriptorOperand& descriptor)
 	m_Package.m_Constant = flags.m_Constant;
 	m_Package.m_RegisterIndex = flags.m_RegisterIndex;
 
-	m_Package.m_Size8 = size.m_Size8;
-	m_Package.m_Size16 = size.m_Size16;
-	m_Package.m_Size32 = size.m_Size32;
-	m_Package.m_Size64 = size.m_Size64;
-	m_Package.m_Size128 = size.m_Size128;
-	m_Package.m_Size256 = size.m_Size256;
-	m_Package.m_Size512 = size.m_Size512;
+	m_Package.m_Mem.m_Size = size.m_Mem.m_Size;
+	m_Package.m_Mem.m_Size16 = size.m_Mem.m_Size16;
+	m_Package.m_Mem.m_Size64 = size.m_Mem.m_Size64;
+	m_Package.m_Mem.m_Size256 = size.m_Mem.m_Size256;
+	m_Package.m_Mem.m_Size512 = size.m_Mem.m_Size512;
+
+	m_Package.m_Reg.m_Size = size.m_Reg.m_Size;
+	m_Package.m_Reg.m_Size16 = size.m_Reg.m_Size16;
+	m_Package.m_Reg.m_Size64 = size.m_Reg.m_Size64;
+	m_Package.m_Reg.m_Size256 = size.m_Reg.m_Size256;
+	m_Package.m_Reg.m_Size512 = size.m_Reg.m_Size512;
 }
 
 const Operand::Package& Operand::GetPackage() const

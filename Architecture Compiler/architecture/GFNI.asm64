@@ -1,0 +1,5 @@
+66 0F 3A CF -> GF2P8AFFINEINVQB xmm, xmm/m128, imm8
+
+66 0F 3A CE -> GF2P8AFFINEQB xmm, xmm/m128, imm8
+
+66 0F 38 CF -> GF2P8MULB xmm, xmm/m128
