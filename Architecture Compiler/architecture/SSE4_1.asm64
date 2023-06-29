@@ -57,3 +57,10 @@
 
 66 0F 38 28 -> PMULDQ xmm, xmm/m128
 66 0F 38 40 -> PMULLD xmm, xmm/m128
+
+66 0F 38 17 -> PTEST xmm, xmm/m128
+
+66 0F 3A 09 -> ROUNDPD xmm, xmm/m128, imm8
+66 0F 3A 08 -> ROUNDPS xmm, xmm/m128, imm8
+66 0F 3A 0B -> ROUNDSD xmm, xmm/m64, imm8
+66 0F 3A 0A -> ROUNDSS xmm, xmm/m32, imm8

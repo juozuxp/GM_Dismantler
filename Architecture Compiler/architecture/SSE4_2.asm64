@@ -4,3 +4,6 @@
 66 0F 3A 63 -> PCMPISTRI xmm, xmm/m128, imm8
 
 66 0F 38 37 -> PCMPGTQ xmm, xmm/m128
+
+F2 0F 38 F0 -> CRC32 r32|64, r/m8
+F2 0F 38 F1 -> CRC32 r32|64, r/m32|16|64

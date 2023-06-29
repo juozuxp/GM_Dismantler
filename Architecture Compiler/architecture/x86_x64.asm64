@@ -71,10 +71,6 @@ FF /3 -> CALL m16:32|16|64
 
 F8 -> CLC
 FC -> CLD
-
-0F AE /7 -> CLFLUSH m8
-66 0F AE /7 -> CLFLUSHOPT m8
-
 FA -> CLI
 
 0F 06 -> CLTS
@@ -124,9 +120,6 @@ A7 -> CMPSD
 48 0F C7 /1 -> CMPXCHG16B m128
 
 0F A2 -> CPUID
-
-F2 0F 38 F0 -> CRC32 r32|64, r/m8
-F2 0F 38 F1 -> CRC32 r32|64, r/m32|16|64
 
 66 99 -> CWD
 99 -> CDQ
@@ -455,11 +448,8 @@ E2 -> LOOP rel8
 E1 -> LOOPE rel8
 E0 -> LOOPNE rel8
 
-0F 03 -> LSL r32|16|64, r32|16/m16
-
 0F 00 /3 -> LTR r32|16|64/m16
-
-0F 01 C8 -> MONITOR
+0F 03 -> LSL r32|16|64, r32|16/m16
 
 88 -> MOV r/m8, r8
 89 -> MOV r/m32|16|64, r32|16|64
@@ -519,8 +509,6 @@ A5 -> MOVSD
 F6 /4 -> MUL r/m8
 F7 /4 -> MUL r/m32|16|64
 
-0F 01 C9 -> MWAIT
-
 F6 /3 -> NEG r/m8
 F7 /3 -> NEG r/m32|16|64
 
@@ -552,14 +540,118 @@ EF -> OUT DX, AX|EAX
 66 6F -> OUTSW
 6F -> OUTSD
 
-F3 90 -> PAUSE
+58 -> POP RAX|AX|REX
+59 -> POP RCX|CX|REX
+5A -> POP RDX|DX|REX
+5B -> POP RBX|BX|REX
+5C -> POP RSP|SP|REX
+5D -> POP RBP|BP|REX
+5E -> POP RSI|SI|REX
+5F -> POP RDI|DI|REX
 
-58 -> POP r64|16
 8F /0 -> POP r/m64|16
 
 0F A1 -> POP FS
 0F A9 -> POP GS
 
-F3 0F B8 -> POPCNT r32|16|64, r/m32|16|64
-
 9D -> POPF
+
+0F 18 /0 -> PREFETCHNTA m8
+0F 18 /1 -> PREFETCHT0 m8
+0F 18 /2 -> PREFETCHT1 m8
+0F 18 /3 -> PREFETCHT2 m8
+
+F3 90 -> PAUSE
+
+50 -> PUSH RAX|AX|REX
+51 -> PUSH RCX|CX|REX
+52 -> PUSH RDX|DX|REX
+53 -> PUSH RBX|BX|REX
+54 -> PUSH RSP|SP|REX
+55 -> PUSH RBP|BP|REX
+56 -> PUSH RSI|SI|REX
+57 -> PUSH RDI|DI|REX
+
+FF /6 -> PUSH r/m32|16|64
+
+6A -> PUSH imm8
+68 -> PUSH imm32|16
+
+0F A0 -> PUSH FS
+0F A8 -> PUSH GS
+
+9C -> PUSHF
+
+D0 /0 -> ROL r/m8, 1
+D0 /1 -> ROR r/m8, 1
+D0 /2 -> RCL r/m8, 1
+D0 /3 -> RCR r/m8, 1
+
+D2 /0 -> ROL r/m8, CL
+D2 /1 -> ROR r/m8, CL
+D2 /2 -> RCL r/m8, CL
+D2 /3 -> RCR r/m8, CL
+
+C0 /0 -> ROL r/m8, imm8
+C0 /1 -> ROR r/m8, imm8
+C0 /2 -> RCL r/m8, imm8
+C0 /3 -> RCR r/m8, imm8
+
+D1 /0 -> ROL r/m32|16|64, 1
+D1 /1 -> ROR r/m32|16|64, 1
+D1 /2 -> RCL r/m32|16|64, 1
+D1 /3 -> RCR r/m32|16|64, 1
+
+D3 /0 -> ROL r/m32|16|64, CL
+D3 /1 -> ROR r/m32|16|64, CL
+D3 /2 -> RCL r/m32|16|64, CL
+D3 /3 -> RCR r/m32|16|64, CL
+
+C1 /0 -> ROL r/m32|16|64, imm8
+C1 /1 -> ROR r/m32|16|64, imm8
+C1 /2 -> RCL r/m32|16|64, imm8
+C1 /3 -> RCR r/m32|16|64, imm8
+
+D0 /4 -> SAL r/m8, 1
+D0 /5 -> SAR r/m8, 1
+D0 /6 -> SHL r/m8, 1
+D0 /7 -> SHR r/m8, 1
+
+D2 /4 -> SAL r/m8, CL
+D2 /5 -> SAR r/m8, CL
+D2 /6 -> SHL r/m8, CL
+D2 /7 -> SHR r/m8, CL
+
+C0 /4 -> SAL r/m8, imm8
+C0 /5 -> SAR r/m8, imm8
+C0 /6 -> SHL r/m8, imm8
+C0 /7 -> SHR r/m8, imm8
+
+D1 /4 -> SAL r/m32|16|64, 1
+D1 /5 -> SAR r/m32|16|64, 1
+D1 /6 -> SHL r/m32|16|64, 1
+D1 /7 -> SHR r/m32|16|64, 1
+
+D3 /4 -> SAL r/m32|16|64, CL
+D3 /5 -> SAR r/m32|16|64, CL
+D3 /6 -> SHL r/m32|16|64, CL
+D3 /7 -> SHR r/m32|16|64, CL
+
+C1 /4 -> SAL r/m32|16|64, imm8
+C1 /5 -> SAR r/m32|16|64, imm8
+C1 /6 -> SHL r/m32|16|64, imm8
+C1 /7 -> SHR r/m32|16|64, imm8
+
+0F 32 -> RDMSR
+0F 33 -> RDPMC
+0F 31 -> RDTSC
+
+0F 01 F9 ->  RDTSCP
+
+C3 -> RET
+CB -> RET
+
+C2 -> RET imm16
+CA -> RET imm16
+
+0F AA -> RSM

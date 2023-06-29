@@ -453,6 +453,17 @@ void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 
 	if (variation[0] >= '0' && variation[0] <= '9')
 	{
+		if (m_Type.m_Type == Type::none)
+		{
+			m_Type.m_Type = Type::imm;
+
+			m_Flags.m_Constant = true;
+			m_Flags.m_RegisterIndex = atoi(variation.data());
+
+			AssignSize(&m_Size.m_Mem, 8);
+			return;
+		}
+
 		uint8_t offset = ParseSize(variation.data());
 		if (variation.size() != offset)
 		{

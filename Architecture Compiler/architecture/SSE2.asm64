@@ -144,3 +144,62 @@ F2 0F 59 -> MULSD xmm, xmm/m64
 
 0F F4 -> PMULUDQ mm, mm/m64
 66 0F F4 -> PMULUDQ xmm, xmm/m128
+
+66 0F EB -> POR xmm, xmm/m128
+
+66 0F F6 -> PSADBW xmm, xmm/m128
+
+66 0F 70 -> PSHUFD xmm, xmm/m128, imm8
+F3 0F 70 -> PSHUFHW xmm, xmm/m128, imm8
+F2 0F 70 -> PSHUFLW xmm, xmm/m128, imm8
+
+66 0F 73 /7 -> PSLLDQ xmm, imm8
+
+66 0F F1 -> PSLLW xmm, xmm/m128
+66 0F F2 -> PSLLD xmm, xmm/m128
+66 0F F3 -> PSLLQ xmm, xmm/m128
+
+66 0F 71 /6 -> PSLLW xmm, imm8
+66 0F 72 /6 -> PSLLD xmm, imm8
+66 0F 73 /6 -> PSLLQ xmm, imm8
+
+66 0F E1 -> PSRAW xmm, xmm/m128
+66 0F E2 -> PSRAD xmm, xmm/m128
+
+66 0F 71 /4 -> PSRAW xmm, imm8
+66 0F 72 /4 -> PSRAD xmm, imm8
+
+66 0F 73 /3 -> PSRLDQ xmm, imm8
+
+66 0F D1 -> PSRLW xmm, xmm/m128
+66 0F D2 -> PSRLD xmm, xmm/m128
+66 0F D3 -> PSRLQ xmm, xmm/m128
+
+66 0F 71 /2 -> PSRLW xmm, imm8
+66 0F 72 /2 -> PSRLD xmm, imm8
+66 0F 73 /2 -> PSRLQ xmm, imm8
+
+66 0F F8 -> PSUBB xmm, xmm/m128
+66 0F F9 -> PSUBW xmm, xmm/m128
+66 0F FA -> PSUBD xmm, xmm/m128
+66 0F FB -> PSUBQ xmm, xmm/m128
+
+0F FB -> PSUBQ mm, mm/m64
+
+66 0F E8 -> PSUBSB xmm, xmm/m128
+66 0F E9 -> PSUBSW xmm, xmm/m128
+
+66 0F D8 -> PSUBUSB xmm, xmm/m128
+66 0F D9 -> PSUBUSW xmm, xmm/m128
+
+66 0F 68 -> PUNPCKHBW xmm, xmm/m128
+66 0F 69 -> PUNPCKHWD xmm, xmm/m128
+66 0F 6A -> PUNPCKHDQ xmm, xmm/m128
+66 0F 6D -> PUNPCKHQDQ xmm, xmm/m128
+
+66 0F 60 -> PUNPCKLBW xmm, xmm/m128
+66 0F 61 -> PUNPCKLWD xmm, xmm/m128
+66 0F 62 -> PUNPCKLDQ xmm, xmm/m128
+66 0F 6C -> PUNPCKLQDQ xmm, xmm/m128
+
+66 0F EF -> PXOR xmm, xmm/m128

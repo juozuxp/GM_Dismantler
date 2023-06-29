@@ -35,3 +35,49 @@
 
 0F E5 -> PMULHW mm, mm/m64
 0F D5 -> PMULLW mm, mm/m64
+
+0F EB -> POR mm, mm/m64
+
+0F 70 -> PSHUFW mm, mm/m64, imm8
+
+0F F1 -> PSLLW mm, mm/m64
+0F F2 -> PSLLD mm, mm/m64
+0F F3 -> PSLLQ mm, mm/m64
+
+0F 71 /6 -> PSLLW mm, imm8
+0F 72 /6 -> PSLLD mm, imm8
+0F 73 /6 -> PSLLQ mm, imm8
+
+0F E1 -> PSRAW mm, mm/m64
+0F E2 -> PSRAD mm, mm/m64
+
+0F 71 /4 -> PSRAW mm, imm8
+0F 72 /4 -> PSRAD mm, imm8
+
+0F D1 -> PSRLW mm, mm/m64
+0F D2 -> PSRLD mm, mm/m64
+0F D3 -> PSRLQ mm, mm/m64
+
+0F 71 /2 -> PSRLW mm, imm8
+0F 72 /2 -> PSRLD mm, imm8
+0F 73 /2 -> PSRLQ mm, imm8
+
+0F F8 -> PSUBB mm, mm/m64
+0F F9 -> PSUBW mm, mm/m64
+0F FA -> PSUBD mm, mm/m64
+
+0F E8 -> PSUBSB mm, mm/m64
+0F E9 -> PSUBSW mm, mm/m64
+
+0F D8 -> PSUBUSB mm, mm/m64
+0F D9 -> PSUBUSW mm, mm/m64
+
+0F 68 -> PUNPCKHBW mm, mm/m64
+0F 69 -> PUNPCKHWD mm, mm/m64
+0F 6A -> PUNPCKHDQ mm, mm/m64
+
+0F 60 -> PUNPCKLBW mm, mm/m32
+0F 61 -> PUNPCKLWD mm, mm/m32
+0F 62 -> PUNPCKLDQ mm, mm/m32
+
+0F EF -> PXOR mm, mm/m64

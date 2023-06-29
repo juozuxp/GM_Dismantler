@@ -23,7 +23,7 @@ Token::Token(const std::string_view& line)
 			break;
 		}
 
-		if (lineCopy[i] == ' ')
+		if (lineCopy[i] == ' ' || lineCopy[i] == '\t')
 		{
 			m_Bytes.push_back(std::string(lineCopy.data() + byte, i - byte));
 			byte = ~0;
@@ -44,7 +44,7 @@ Token::Token(const std::string_view& line)
 			return;
 		}
 
-		if (lineCopy[i] != ' ')
+		if (lineCopy[i] != ' ' && lineCopy[i] != '\t')
 		{
 			seperator = i;
 			break;
@@ -54,7 +54,7 @@ Token::Token(const std::string_view& line)
 	uint32_t instruction = seperator;
 	for (uint32_t i = seperator; i < lineCopy.size(); i++)
 	{
-		if (lineCopy[i] == ' ')
+		if (lineCopy[i] == ' ' || lineCopy[i] == '\t')
 		{
 			seperator = i;
 			break;
@@ -77,7 +77,7 @@ Token::Token(const std::string_view& line)
 				return;
 			}
 
-			if (lineCopy[i] != ' ')
+			if (lineCopy[i] != ' ' && lineCopy[i] != '\t')
 			{
 				seperator = i;
 				break;
@@ -104,7 +104,7 @@ Token::Token(const std::string_view& line)
 		uint32_t operand = ~0;
 		for (uint32_t i = operands; i < seperator; i++)
 		{
-			if (lineCopy[i] == ' ')
+			if (lineCopy[i] == ' ' || lineCopy[i] == '\t')
 			{
 				if (operand != ~0)
 				{

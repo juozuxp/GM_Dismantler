@@ -1,0 +1,2 @@
+0F 01 C9 -> MWAIT
+0F 01 C8 -> MONITOR

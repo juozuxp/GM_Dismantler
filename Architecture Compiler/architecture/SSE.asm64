@@ -70,3 +70,12 @@ F3 0F 59 -> MULSS xmm, xmm/m32
 0F D7 -> PMOVMSKB r32|64, mm
 
 0F E4 -> PMULHUW mm, mm/m64
+
+0F F6 -> PSADBW mm, mm/m64
+
+0F 53 -> RCPPS xmm, xmm/m128
+
+F3 0F 53 -> RCPSS xmm, xmm/m32
+
+0F 52 -> RSQRTPS xmm, xmm/m128
+F3 0F 52 -> RSQRTSS xmm, xmm/m32

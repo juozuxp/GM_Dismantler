@@ -44,4 +44,15 @@ F3 0F 12 -> MOVSLDUP xmm, xmm/m128
 66 0F 38 04 -> PMADDUBSW xmm, xmm/m128
 
 0F 38 0B -> PMULHRSW mm, mm/m64
-66 0F 38 0B -> PMULHRSW xmm, xmm/m128 
+66 0F 38 0B -> PMULHRSW xmm, xmm/m128
+
+0F 38 00 -> PSHUFB mm, mm/m64
+66 0F 38 00 -> PSHUFB xmm, xmm/m128
+
+0F 38 08 -> PSIGNB mm, mm/m64
+0F 38 09 -> PSIGNW mm, mm/m64
+0F 38 0A -> PSIGND mm, mm/m64
+
+66 0F 38 08 -> PSIGNB xmm, xmm/m128
+66 0F 38 09 -> PSIGNW xmm, xmm/m128
+66 0F 38 0A -> PSIGND xmm, xmm/m128
