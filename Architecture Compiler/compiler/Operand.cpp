@@ -28,17 +28,8 @@ Operand::Operand(const DescriptorOperand& descriptor)
 	m_Package.m_Constant = flags.m_Constant;
 	m_Package.m_RegisterIndex = flags.m_RegisterIndex;
 
-	m_Package.m_Mem.m_Size = size.m_Mem.m_Size;
-	m_Package.m_Mem.m_Size16 = size.m_Mem.m_Size16;
-	m_Package.m_Mem.m_Size64 = size.m_Mem.m_Size64;
-	m_Package.m_Mem.m_Size256 = size.m_Mem.m_Size256;
-	m_Package.m_Mem.m_Size512 = size.m_Mem.m_Size512;
-
-	m_Package.m_Reg.m_Size = size.m_Reg.m_Size;
-	m_Package.m_Reg.m_Size16 = size.m_Reg.m_Size16;
-	m_Package.m_Reg.m_Size64 = size.m_Reg.m_Size64;
-	m_Package.m_Reg.m_Size256 = size.m_Reg.m_Size256;
-	m_Package.m_Reg.m_Size512 = size.m_Reg.m_Size512;
+	m_Package.m_Mem = size.m_Mem;
+	m_Package.m_Reg = size.m_Reg;
 }
 
 const Operand::Package& Operand::GetPackage() const

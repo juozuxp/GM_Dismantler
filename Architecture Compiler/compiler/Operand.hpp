@@ -31,25 +31,8 @@ public:
 			uint8_t m_RegisterIndex : 4;
 		};
 
-		struct
-		{
-			DescriptorOperand::Size m_Size : 4;
-
-			uint8_t m_Size16 : 1;
-			uint8_t m_Size64 : 1;
-			uint8_t m_Size256 : 1;
-			uint8_t m_Size512 : 1;
-		} m_Reg;
-
-		struct
-		{
-			DescriptorOperand::Size m_Size : 4;
-
-			uint8_t m_Size16 : 1;
-			uint8_t m_Size64 : 1;
-			uint8_t m_Size256 : 1;
-			uint8_t m_Size512 : 1;
-		} m_Mem;
+		DescriptorOperand::VariationSize m_Reg;
+		DescriptorOperand::VariationSize m_Mem;
 	};
 #pragma pack(pop)
 

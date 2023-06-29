@@ -31,11 +31,15 @@ public:
 	enum class Size : uint8_t
 	{
 		undefined,
+		far_32, // override1 -> override to size 16, override2 -> override to size 64
 		base_8,
-		far_32,
-		base_32,
+		base_16, // override1 -> override to size 32, override2 -> override to size 64
+		base_32, // override1 -> override to size 16, override2 -> override to size 64
+		base_64, // override1 -> override to size 16
 		base_80,
-		base_128,
+		base_128, // override1 -> override to size 256, override2 -> override to size 512
+		base_256,
+		base_512
 	};
 
 	enum class Segments : uint8_t // Segment denotation, for the m_RegisterIndex
@@ -72,29 +76,20 @@ public:
 		uint8_t m_Value = 0;
 	};
 
+	struct VariationSize
+	{
+		Size m_Size : 6;
+
+		uint8_t m_Override1 : 1; // x66 or ymm override
+		uint8_t m_Override2 : 1; // x48 (rexw) or zmm override
+	};
+
 	union SizeMask
 	{
 		struct
 		{
-			struct
-			{
-				Size m_Size : 4;
-
-				uint8_t m_Size16 : 1; // if m_Size == Size::undefined, and m_Size64 is not set, the base defaults to m_Size16
-				uint8_t m_Size64 : 1; // if m_Size == Size::undefined, and m_Size16 is set, the base defaults to m_Size64
-				uint8_t m_Size256 : 1;
-				uint8_t m_Size512 : 1;
-			} m_Reg;
-
-			struct
-			{
-				Size m_Size : 4;
-
-				uint8_t m_Size16 : 1; // if m_Size == Size::undefined, and m_Size64 is not set, the base defaults to m_Size16
-				uint8_t m_Size64 : 1; // if m_Size == Size::undefined, and m_Size16 is set, the base defaults to m_Size64
-				uint8_t m_Size256 : 1;
-				uint8_t m_Size512 : 1;
-			} m_Mem;
+			VariationSize m_Reg;
+			VariationSize m_Mem;
 		};
 
 		uint16_t m_Value = 0;
@@ -121,6 +116,8 @@ private:
 	void ParseForGeneral(const std::string_view& variation);
 
 	uint8_t ParseSize(const std::string_view& variation);
+
+	void AssignSize(VariationSize* mask, uint32_t size);
 
 private:
 	TypeMask m_Type = {};

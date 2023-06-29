@@ -88,11 +88,11 @@ DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 		}
 	}
 
-	_ASSERT(m_Size.m_Reg.m_Size != Size::undefined || ((!(m_Size.m_Reg.m_Size16 || m_Size.m_Reg.m_Size64) && (m_Size.m_Reg.m_Size256 || m_Size.m_Reg.m_Size512)) || ((m_Size.m_Reg.m_Size16 || m_Size.m_Reg.m_Size64) && !(m_Size.m_Reg.m_Size256 || m_Size.m_Reg.m_Size512)) || (!m_Size.m_Reg.m_Size16 && !m_Size.m_Reg.m_Size64 && !m_Size.m_Reg.m_Size256 && !m_Size.m_Reg.m_Size512)));
-	_ASSERT(m_Size.m_Mem.m_Size != Size::undefined || ((!(m_Size.m_Mem.m_Size16 || m_Size.m_Mem.m_Size64) && (m_Size.m_Mem.m_Size256 || m_Size.m_Mem.m_Size512)) || ((m_Size.m_Mem.m_Size16 || m_Size.m_Mem.m_Size64) && !(m_Size.m_Mem.m_Size256 || m_Size.m_Mem.m_Size512)) || (!m_Size.m_Mem.m_Size16 && !m_Size.m_Mem.m_Size64 && !m_Size.m_Mem.m_Size256 && !m_Size.m_Mem.m_Size512)));
+	_ASSERT(m_Size.m_Mem.m_Size != Size::base_64 || !m_Size.m_Mem.m_Override2);
+	_ASSERT(m_Size.m_Reg.m_Size != Size::base_64 || !m_Size.m_Reg.m_Override2);
 
-	_ASSERT(m_Size.m_Reg.m_Size == Size::undefined || (m_Size.m_Reg.m_Size == Size::base_32 && !m_Size.m_Reg.m_Size256 && !m_Size.m_Reg.m_Size512) || (m_Size.m_Reg.m_Size == Size::base_128 && !m_Size.m_Reg.m_Size16 && !m_Size.m_Reg.m_Size64) || ((m_Size.m_Reg.m_Size == Size::base_8 || m_Size.m_Reg.m_Size == Size::base_80) && !m_Size.m_Reg.m_Size16 && !m_Size.m_Reg.m_Size64 && !m_Size.m_Reg.m_Size256 && !m_Size.m_Reg.m_Size512));
-	_ASSERT(m_Size.m_Mem.m_Size == Size::undefined || ((m_Size.m_Mem.m_Size == Size::base_32 || m_Size.m_Mem.m_Size == Size::far_32) && !m_Size.m_Mem.m_Size256 && !m_Size.m_Mem.m_Size512) || (m_Size.m_Mem.m_Size == Size::base_128 && !m_Size.m_Mem.m_Size16 && !m_Size.m_Mem.m_Size64) || ((m_Size.m_Mem.m_Size == Size::base_8 || m_Size.m_Mem.m_Size == Size::base_80) && !m_Size.m_Mem.m_Size16 && !m_Size.m_Mem.m_Size64 && !m_Size.m_Mem.m_Size256 && !m_Size.m_Mem.m_Size512));
+	_ASSERT(!(m_Size.m_Mem.m_Size == Size::base_512 || m_Size.m_Mem.m_Size == Size::base_256 || m_Size.m_Mem.m_Size == Size::base_80 || m_Size.m_Mem.m_Size == Size::base_8 || m_Size.m_Mem.m_Size == Size::undefined) || !(m_Size.m_Mem.m_Override1 && m_Size.m_Mem.m_Override2));
+	_ASSERT(!(m_Size.m_Reg.m_Size == Size::base_512 || m_Size.m_Reg.m_Size == Size::base_256 || m_Size.m_Reg.m_Size == Size::base_80 || m_Size.m_Reg.m_Size == Size::base_8 || m_Size.m_Reg.m_Size == Size::undefined) || !(m_Size.m_Reg.m_Override1 && m_Size.m_Reg.m_Override2));
 }
 
 const DescriptorOperand::TypeMask& DescriptorOperand::GetTypeMask() const
@@ -142,7 +142,7 @@ bool DescriptorOperand::ParseForMm(const std::string_view& variation)
 			if (variation[2] >= '0' && variation[2] <= '9')
 			{
 				m_Type.m_Type = Type::reg;
-				m_Size.m_Reg.m_Size64 = true;
+				AssignSize(&m_Size.m_Reg, 64);
 
 				m_Flags.m_Constant = true;
 				m_Flags.m_RegisterIndex = variation[2] - '0';
@@ -168,7 +168,7 @@ bool DescriptorOperand::ParseForMm(const std::string_view& variation)
 		_ASSERT(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
-		m_Size.m_Reg.m_Size64 = true;
+		AssignSize(&m_Size.m_Reg, 64);
 	}
 
 	return true;
@@ -208,7 +208,7 @@ bool DescriptorOperand::ParseForSt(const std::string_view& variation)
 				if (variation[3] >= '0' && variation[3] <= '9')
 				{
 					m_Type.m_Type = Type::reg;
-					m_Size.m_Reg.m_Size = Size::base_80;
+					AssignSize(&m_Size.m_Reg, 80);
 
 					m_Flags.m_Constant = true;
 					m_Flags.m_RegisterIndex = variation[3] - '0';
@@ -232,7 +232,7 @@ bool DescriptorOperand::ParseForSt(const std::string_view& variation)
 		_ASSERT(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
-		m_Size.m_Reg.m_Size = Size::base_80;
+		AssignSize(&m_Size.m_Reg, 80);
 	}
 
 	return true;
@@ -253,8 +253,8 @@ bool DescriptorOperand::ParseForCr(const std::string_view& variation)
 		}
 
 		m_Type.m_Type = Type::reg;
-		m_Size.m_Reg.m_Size64 = true;
 		m_Type.m_Register = Register::cr;
+		AssignSize(&m_Size.m_Reg, 64);
 	}
 
 	return true;
@@ -275,8 +275,8 @@ bool DescriptorOperand::ParseForDr(const std::string_view& variation)
 		}
 
 		m_Type.m_Type = Type::reg;
-		m_Size.m_Reg.m_Size64 = true;
 		m_Type.m_Register = Register::dr;
+		AssignSize(&m_Size.m_Reg, 64);
 	}
 
 	return true;
@@ -314,7 +314,7 @@ bool DescriptorOperand::ParseForXmm(const std::string_view& variation)
 			if (variation[3] >= '0' && variation[3] <= '9')
 			{
 				m_Type.m_Type = Type::reg;
-				m_Size.m_Reg.m_Size = Size::base_128;
+				AssignSize(&m_Size.m_Reg, 128);
 
 				m_Flags.m_Constant = true;
 				m_Flags.m_RegisterIndex = variation[3] - '0';
@@ -340,7 +340,7 @@ bool DescriptorOperand::ParseForXmm(const std::string_view& variation)
 		_ASSERT(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
-		m_Size.m_Reg.m_Size = Size::base_128;
+		AssignSize(&m_Size.m_Reg, 128);
 	}
 
 	return true;
@@ -386,7 +386,7 @@ bool DescriptorOperand::ParseForBnd(const std::string_view& variation)
 		_ASSERT(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
-		m_Size.m_Reg.m_Size = Size::base_128;
+		AssignSize(&m_Size.m_Reg, 128);
 	}
 
 	return true;
@@ -434,12 +434,12 @@ bool DescriptorOperand::ParseForSreg(const std::string_view& variation)
 
 		if (m_Flags.m_Constant && (m_Flags.m_RegisterIndex == static_cast<uint8_t>(Segments::fs) || m_Flags.m_RegisterIndex == static_cast<uint8_t>(Segments::gs)))
 		{
-			m_Size.m_Reg.m_Size16 = true;
-			m_Size.m_Reg.m_Size64 = true;
+			AssignSize(&m_Size.m_Reg, 64);
+			AssignSize(&m_Size.m_Reg, 16);
 		}
 		else
 		{
-			m_Size.m_Reg.m_Size16 = true;
+			AssignSize(&m_Size.m_Reg, 16);
 		}
 	}
 
@@ -479,7 +479,7 @@ void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 		if (variation[1] != '/' && variation[1] != 'e' && (variation[1] < '0' || variation[1] > '9'))
 		{
 			cursor = 1;
-			m_Size.m_Reg.m_Size64 = true;
+			AssignSize(&m_Size.m_Reg, 64);
 		}
 		else
 		{
@@ -523,7 +523,7 @@ void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 		if (variation[0] == 'e')
 		{
 			cursor = 1;
-			m_Size.m_Reg.m_Size = Size::base_32;
+			AssignSize(&m_Size.m_Reg, 32);
 		}
 		else
 		{
@@ -592,7 +592,7 @@ void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 		{
 			if (cursor == 0)
 			{
-				m_Size.m_Reg.m_Size16 = true;
+				AssignSize(&m_Size.m_Reg, 16);
 			}
 
 			m_Type.m_Type = Type::reg;
@@ -611,13 +611,104 @@ void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 	{
 		if (!strncmp(variation.data(), lowerRegisters[i], 2))
 		{
+			AssignSize(&m_Size.m_Reg, 8);
 			m_Type.m_Type = Type::reg;
-			m_Size.m_Reg.m_Size = Size::base_8;
 
 			m_Flags.m_Constant = true;
 			m_Flags.m_RegisterIndex = i;
 			return;
 		}
+	}
+}
+
+void DescriptorOperand::AssignSize(VariationSize* mask, uint32_t size)
+{
+	switch (size)
+	{
+	case 8:
+	{
+		_ASSERT(mask->m_Size == Size::base_8 || mask->m_Size == Size::undefined);
+		mask->m_Size = Size::base_8;
+	} break;
+	case 16:
+	{
+		_ASSERT(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64 || mask->m_Size == Size::undefined);
+
+		if (mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64)
+		{
+			mask->m_Override1 = true;
+		}
+		else
+		{
+			mask->m_Size = Size::base_16;
+		}
+	} break;
+	case 32:
+	{
+		_ASSERT(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::undefined);
+
+		if (mask->m_Size == Size::base_16)
+		{
+			mask->m_Override1 = true;
+		}
+		else
+		{
+			mask->m_Size = Size::base_32;
+		}
+	} break;
+	case 64:
+	{
+		_ASSERT(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64 || mask->m_Size == Size::undefined);
+
+		if (mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64)
+		{
+			mask->m_Override2 = true;
+		}
+		else
+		{
+			mask->m_Size = Size::base_64;
+		}
+	} break;
+	case 80:
+	{
+		_ASSERT(mask->m_Size == Size::base_80 || mask->m_Size == Size::undefined);
+		mask->m_Size = Size::base_80;
+	} break;
+	case 128:
+	{
+		_ASSERT(mask->m_Size == Size::base_128 || mask->m_Size == Size::undefined);
+		mask->m_Size = Size::base_128;
+	} break;
+	case 256:
+	{
+		_ASSERT(mask->m_Size == Size::base_128 || mask->m_Size == Size::base_256 || mask->m_Size == Size::undefined);
+
+		if (mask->m_Size == Size::base_128)
+		{
+			mask->m_Override1 = true;
+		}
+		else
+		{
+			mask->m_Size = Size::base_256;
+		}
+	} break;
+	case 512:
+	{
+		_ASSERT(mask->m_Size == Size::base_128 || mask->m_Size == Size::base_512 || mask->m_Size == Size::undefined);
+
+		if (mask->m_Size == Size::base_128)
+		{
+			mask->m_Override2 = true;
+		}
+		else
+		{
+			mask->m_Size = Size::base_512;
+		}
+	} break;
+	default:
+	{
+		_ASSERT(false);
+	} break;
 	}
 }
 
@@ -647,14 +738,14 @@ uint8_t DescriptorOperand::ParseSize(const std::string_view& variation)
 			{
 			case 16:
 			{
-				m_Size.m_Mem.m_Size16 = true;
+				m_Size.m_Mem.m_Override1 = true;
 			} break;
 			case 32:
 			{
 			} break;
 			case 64:
 			{
-				m_Size.m_Mem.m_Size64 = true;
+				m_Size.m_Mem.m_Override2 = true;
 			} break;
 			default:
 			{
@@ -668,88 +759,12 @@ uint8_t DescriptorOperand::ParseSize(const std::string_view& variation)
 
 	if (m_Type.m_Type == Type::reg || (m_Type.m_Type == Type::modrm && !m_IsSeparateSize))
 	{
-		switch (size)
-		{
-		case 8:
-		{
-			m_Size.m_Reg.m_Size = Size::base_8;
-		} break;
-		case 16:
-		{
-			m_Size.m_Reg.m_Size16 = true;
-		} break;
-		case 32:
-		{
-			m_Size.m_Reg.m_Size = Size::base_32;
-		} break;
-		case 64:
-		{
-			m_Size.m_Reg.m_Size64 = true;
-		} break;
-		case 80:
-		{
-			m_Size.m_Reg.m_Size = Size::base_80;
-		} break;
-		case 128:
-		{
-			m_Size.m_Reg.m_Size = Size::base_128;
-		} break;
-		case 256:
-		{
-			m_Size.m_Reg.m_Size256 = true;
-		} break;
-		case 512:
-		{
-			m_Size.m_Reg.m_Size512 = true;
-		} break;
-		default:
-		{
-			_ASSERT(false);
-		} break;
-		}
+		AssignSize(&m_Size.m_Reg, size);
 	}
 
 	if (m_Type.m_Type != Type::reg)
 	{
-		switch (size)
-		{
-		case 8:
-		{
-			m_Size.m_Mem.m_Size = Size::base_8;
-		} break;
-		case 16:
-		{
-			m_Size.m_Mem.m_Size16 = true;
-		} break;
-		case 32:
-		{
-			m_Size.m_Mem.m_Size = Size::base_32;
-		} break;
-		case 64:
-		{
-			m_Size.m_Mem.m_Size64 = true;
-		} break;
-		case 80:
-		{
-			m_Size.m_Mem.m_Size = Size::base_80;
-		} break;
-		case 128:
-		{
-			m_Size.m_Mem.m_Size = Size::base_128;
-		} break;
-		case 256:
-		{
-			m_Size.m_Mem.m_Size256 = true;
-		} break;
-		case 512:
-		{
-			m_Size.m_Mem.m_Size512 = true;
-		} break;
-		default:
-		{
-			_ASSERT(false);
-		} break;
-		}
+		AssignSize(&m_Size.m_Mem, size);
 	}
 
 	return size == 0 ? 0 : floor(log10(size)) + 1;
