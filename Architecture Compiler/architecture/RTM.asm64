@@ -1,0 +1,5 @@
+C6 F8 -> XABORT imm8
+
+0F 01 D5 -> XEND
+
+C7 F8 -> XBEGIN rel32|16

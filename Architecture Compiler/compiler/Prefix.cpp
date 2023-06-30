@@ -56,9 +56,20 @@ Prefix::Package Prefix::GetBasePackage() const
 {
 	Package package;
 
-	package.m_Value = m_Prefix;
+	package.m_Prefix = m_Prefix;
+	package.m_Instruction = m_Instruction;
 
 	return package;
+}
+
+void Prefix::SetStandAlone(uint16_t instructionType)
+{
+	m_Instruction = instructionType;
+}
+
+bool Prefix::IsStandAlone()
+{
+	return m_Instruction != static_cast<uint16_t>(~0);
 }
 
 Prefix::PackageType Prefix::GetPackageType() const
@@ -68,5 +79,6 @@ Prefix::PackageType Prefix::GetPackageType() const
 
 Redirection::Prefix Prefix::GetRedirectPrefix() const
 {
+	_ASSERT(m_RedirectPrefix != Redirection::Prefix::Default);
 	return m_RedirectPrefix;
 }

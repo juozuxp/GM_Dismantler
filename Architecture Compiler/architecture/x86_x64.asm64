@@ -655,3 +655,134 @@ C2 -> RET imm16
 CA -> RET imm16
 
 0F AA -> RSM
+
+1C -> SBB AL, imm8
+1D -> SBB EAX|AX|RAX, imm32|16|64
+
+80 /3 -> SBB r/m8, imm8
+81 /3 -> SBB r/m32|16|64, imm32|16|64
+
+18 -> SBB r/m8, r8
+19 -> SBB r/m32|16|64, r32|16|64
+
+1A -> SBB r8, r/m8
+1B -> SBB r32|16|64, r/m32|16|64
+
+AE -> SCASB
+66 AF -> SCASW
+AF -> SCASD
+48 AF -> SCASQ
+
+0F 90 -> SETO r/m8
+0F 91 -> SETNO r/m8
+0F 92 -> SETB r/m8
+0F 93 -> SETAE r/m8
+0F 94 -> SETE r/m8
+0F 95 -> SETNE r/m8
+0F 96 -> SETBE r/m8
+0F 97 -> SETA r/m8
+0F 98 -> SETS r/m8
+0F 99 -> SETNS r/m8
+0F 9A -> SETPE r/m8
+0F 9B -> SETPO r/m8
+0F 9C -> SETL r/m8
+0F 9D -> SETGE r/m8
+0F 9E -> SETLE r/m8
+0F 9F -> SETG r/m8
+
+0F AE F8 -> SFENCE
+
+0F 01 /0 -> SGDT m
+
+0F A4 -> SHLD r/m32|16|64, r32|16|64, imm8
+0F A5 -> SHLD r/m32|16|64, r32|16|64, CL
+
+0F AC -> SHRD r/m32|16|64, r32|16|64, imm8
+0F AD -> SHRD r/m32|16|64, r32|16|64, CL
+
+0F 00 /0 -> SLDT r/m16
+0F 01 /1 -> SIDT m
+0F 01 /4 -> SMSW r32|16|64/m16
+
+F9 -> STC
+FB -> STI
+FD -> STD
+
+AA -> STOSB
+66 AB -> STOSW
+AB -> STOSD
+48 AB -> STOSQ
+
+0F 00 /1 -> STR r/m16
+
+2C -> SUB AL, imm8
+2D -> SUB EAX|AX|RAX, imm32|16
+
+80 /5 -> SUB r/m8, imm8
+
+83 /5 -> SUB r/m32|16|64, imm8
+81 /5 -> SUB r/m32|16|64, imm32|16
+
+28 -> SUB r/m8, r8
+29 -> SUB r/m32|16|64, r32|16|64
+
+2A -> SUB r8, r/m8
+2B -> SUB r32|16|64, r/m32|16|64
+
+0F 01 F8 -> SWAPGS
+
+0F 05 -> SYSCALL
+0F 07 -> SYSRET
+0F 35 -> SYSEXIT
+0F 34 -> SYSENTER
+
+A8 -> TEST AL, imm8
+A9 -> TEST EAX|AX|RAX, imm32|16
+
+F7 /0 -> TEST r/m32|16|64, imm32|16
+
+84 -> TEST r/m8, r8
+85 -> TEST r/m32|16|64, r32|16|64
+
+0F FF -> UD0 r32, r/m32
+0F B9 -> UD1 r32, r/m32
+0F 0B -> UD2
+
+0F 00 /4 -> VERR r/m16
+0F 00 /5 -> VERW r/m16
+
+0F 09 -> WBINVD
+0F 30 -> WRMSR
+
+0F C0 -> XADD r/m8, r8
+0F C1 -> XADD r/m32|16|64, r32|16|64
+
+91 -> XCHG ECX|CX|RCX|REX, EAX|AX|RAX
+92 -> XCHG EDX|DX|RDX|REX, EAX|AX|RAX
+93 -> XCHG EBX|BX|RBX|REX, EAX|AX|RAX
+94 -> XCHG ESP|SP|RSP|REX, EAX|AX|RAX
+95 -> XCHG EBP|BP|RBP|REX, EAX|AX|RAX
+96 -> XCHG ESI|SI|RSI|REX, EAX|AX|RAX
+97 -> XCHG EDI|DI|RDI|REX, EAX|AX|RAX
+
+86 -> XCHG r/m8, r8
+87 -> XCHG r/m32|16|64, r32|16|64
+
+0F 01 D0 -> XGETBV
+D7 -> XLATB
+
+34 -> XOR AL, imm8
+35 -> XOR EAX|AX|RAX, imm32|16
+
+80 /6 -> XOR r/m8, imm8
+81 /6 -> XOR r/m32|16|64, imm32|16
+
+30 -> XOR r/m8, r8
+31 -> XOR r/m32|16|64, r32|16|64
+
+32 -> XOR r8, r/m8
+33 -> XOR r32|16|64, r/m32|16|64
+
+0F 01 D1 -> XSETBV
+
+9B -> FWAIT

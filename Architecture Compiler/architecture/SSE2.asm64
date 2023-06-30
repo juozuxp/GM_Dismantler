@@ -203,3 +203,18 @@ F2 0F 70 -> PSHUFLW xmm, xmm/m128, imm8
 66 0F 6C -> PUNPCKLQDQ xmm, xmm/m128
 
 66 0F EF -> PXOR xmm, xmm/m128
+
+66 0F C6 -> SHUFPD xmm, xmm/m128, imm8
+
+66 0F 51 -> SQRTPD xmm, xmm/m128
+F2 0F 51 -> SQRTSD xmm, xmm/m64
+
+66 0F 5C -> SUBPD xmm, xmm/m128
+F2 0F 5C -> SUBSD xmm, xmm/m64
+
+66 0F 2E -> UCOMISD xmm, xmm/m64
+
+66 0F 14 -> UNPCKLPD xmm, xmm/m128
+66 0F 15 -> UNPCKHPD xmm, xmm/m128
+
+66 0F 57 -> XORPD xmm, xmm/m128

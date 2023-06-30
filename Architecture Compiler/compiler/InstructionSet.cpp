@@ -14,6 +14,17 @@ InstructionSet::InstructionSet(const DescriptorSet& descriptors)
 
 	for (const Descriptor& descriptor : descriptors)
 	{
+		m_Types[descriptor.GetName()] = 0;
+	}
+
+	uint32_t i = 1;
+	for (const std::pair<std::string, uint32_t>& type : m_Types)
+	{
+		m_Types[type.first] = i++;
+	}
+
+	for (const Descriptor& descriptor : descriptors)
+	{
 		Insert(descriptor);
 	}
 }
@@ -95,10 +106,33 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 
 	std::shared_ptr<FullRedirection> redirect;
 
+	bool x383A = false;
+
 	const std::vector<uint8_t>& bytes = descriptor.GetBytes();
 	for (uint8_t i = 0; i < bytes.size(); i++)
 	{
 		std::shared_ptr<ByteEntry>& entry = redirect ? redirect->Get(bytes[i]) : m_Bytes[bytes[i]];
+
+		if (redirect)
+		{
+			if (!x383A)
+			{
+				if (bytes[i] == 0x38)
+				{
+					redirections.push_back(Redirection::Entry::Entry(Redirection::Prefix::x0F38));
+					x383A = true;
+
+					continue;
+				}
+				else if (bytes[i] == 0x3A)
+				{
+					redirections.push_back(Redirection::Entry::Entry(Redirection::Prefix::x0F3A));
+					x383A = true;
+
+					continue;
+				}
+			}
+		}
 
 		if (!entry)
 		{
@@ -109,13 +143,7 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 				redirections.push_back(Redirection::Entry::Entry(Redirection::Type::Mem, GET_MOD_RM(bytes[i + 1])));
 			}
 
-			uint32_t& type = m_Types[descriptor.GetName()];
-			if (type == 0)
-			{
-				type = m_Types.size();
-			}
-
-			entry = Redirection::Insert(entry, Instruction(descriptor, type), redirections);
+			entry = Redirection::Insert(entry, Instruction(descriptor, m_Types[descriptor.GetName()]), redirections);
 			break;
 		}
 
@@ -131,24 +159,34 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 				redirections.push_back(Redirection::Entry::Entry(Redirection::Type::Mem, GET_MOD_RM(bytes[i + 1])));
 			}
 
-			uint32_t& type = m_Types[descriptor.GetName()];
-			if (type == 0)
-			{
-				type = m_Types.size();
-			}
-
-			entry = Redirection::Insert(entry, Instruction(descriptor, type), redirections);
+			entry = Redirection::Insert(entry, Instruction(descriptor, m_Types[descriptor.GetName()]), redirections);
 			break;
 		}
 
 		if (type == ByteEntry::PackageType::Prefix)
 		{
+			if (i == (bytes.size() - 1))
+			{
+				std::shared_ptr<Prefix> prefix = std::reinterpret_pointer_cast<Prefix>(entry);
+
+				_ASSERT(prefix->GetRedirectPrefix() != Redirection::Prefix::Default);
+				_ASSERT(prefix->GetRedirectPrefix() == Redirection::Prefix::Wait); // only known instance for now
+				_ASSERT(redirections.size() == 0);
+				_ASSERT(!prefix->IsStandAlone());
+
+				prefix->SetStandAlone(m_Types[descriptor.GetName()]);
+			}
+
 			redirections.push_back(Redirection::Entry::Entry(std::reinterpret_pointer_cast<Prefix>(entry)->GetRedirectPrefix()));
 		}
 
-		if (type == ByteEntry::PackageType::FullRedirection)
+		else if (type == ByteEntry::PackageType::FullRedirection)
 		{
 			redirect = std::reinterpret_pointer_cast<FullRedirection>(entry);
+		}
+		else
+		{
+			_ASSERT(false);
 		}
 	}
 }
@@ -189,7 +227,4 @@ void InstructionSet::CreateCoreBytes()
 
 	m_Bytes[0xF2] = std::make_shared<Prefix>(Prefix::Type_Repne);
 	m_Bytes[0xF3] = std::make_shared<Prefix>(Prefix::Type_Repe);
-
-	subSet->Get(0x38) = std::make_shared<Prefix>(Prefix::Type_x0F38);
-	subSet->Get(0x3A) = std::make_shared<Prefix>(Prefix::Type_x0F3A);
 }

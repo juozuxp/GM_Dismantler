@@ -1,0 +1,5 @@
+0F AE /5 -> XRSTOR m
+48 0F AE /5 -> XRSTOR64 m
+
+0F AE /4 -> XSAVE m
+48 0F AE /4 -> XSAVE64 m

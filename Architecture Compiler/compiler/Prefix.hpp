@@ -26,33 +26,41 @@ public:
 	};
 
 #pragma pack(push, 1)
-	union Package
+	struct Package
 	{
-		struct
+		uint16_t m_Instruction; // if pfx is fully redirect we can use it as an instruction for stand alone, ~0 if the pfx cannot be standalone
+		union
 		{
-			uint16_t m_REXW : 1;
-			uint16_t m_WAIT : 1;
-			uint16_t m_REPZ : 1;
-			uint16_t m_REPNZ : 1;
-			uint16_t m_x66 : 1;
-			uint16_t m_x0F38 : 1;
-			uint16_t m_x0F3A : 1;
+			struct
+			{
+				uint16_t m_REXW : 1;
+				uint16_t m_WAIT : 1;
+				uint16_t m_REPZ : 1;
+				uint16_t m_REPNZ : 1;
+				uint16_t m_x66 : 1;
+				uint16_t m_x0F38 : 1;
+				uint16_t m_x0F3A : 1;
 
-			uint16_t m_REX : 1;
-			uint16_t m_REXB : 1;
-			uint16_t m_REXX : 1;
-			uint16_t m_REXR : 1;
-			uint16_t m_GS : 1;
-			uint16_t m_FS : 1;
-			uint16_t m_LOCK : 1;
+				uint16_t m_REX : 1;
+				uint16_t m_REXB : 1;
+				uint16_t m_REXX : 1;
+				uint16_t m_REXR : 1;
+				uint16_t m_GS : 1;
+				uint16_t m_FS : 1;
+				uint16_t m_LOCK : 1;
+			};
+			uint16_t m_Prefix;
 		};
-		uint16_t m_Value;
 	};
 #pragma pack(pop)
 
 public:
 	Prefix() = default;
 	Prefix(uint16_t prefix);
+
+public:
+	bool IsStandAlone();
+	void SetStandAlone(uint16_t instructionType);
 
 public:
 	PackageType GetPackageType() const override;
@@ -66,6 +74,7 @@ private:
 
 private:
 	uint16_t m_Prefix = 0;
+	uint16_t m_Instruction = ~0;
 	Redirection::Prefix m_RedirectPrefix = Redirection::Prefix::Default;
 };
 

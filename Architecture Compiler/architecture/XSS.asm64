@@ -1,0 +1,5 @@
+0F C7 /3 -> XRSTORS m
+48 0F C7 /3 -> XRSTORS64 m
+
+0F C7 /5 -> XSAVES m
+48 0F C7 /5 -> XSAVES64 m

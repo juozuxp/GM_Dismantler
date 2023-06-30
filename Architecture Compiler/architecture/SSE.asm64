@@ -79,3 +79,20 @@ F3 0F 53 -> RCPSS xmm, xmm/m32
 
 0F 52 -> RSQRTPS xmm, xmm/m128
 F3 0F 52 -> RSQRTSS xmm, xmm/m32
+
+0F C6 -> SHUFPS xmm, xmm/m128, imm8
+
+0F 51 -> SQRTPS xmm, xmm/m128
+F3 0F 51 -> SQRTSS xmm, xmm/m32
+
+0F AE /3 -> STMXCSR m32
+
+0F 5C -> SUBPS xmm, xmm/m128
+F3 0F 5C -> SUBSS xmm, xmm/m32
+
+0F 2E -> UCOMISS xmm, xmm/m32
+
+0F 14 -> UNPCKLPS xmm, xmm/m128
+0F 15 -> UNPCKHPS xmm, xmm/m128
+
+0F 57 -> XORPS xmm, xmm/m128

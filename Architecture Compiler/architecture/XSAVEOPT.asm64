@@ -1,0 +1,2 @@
+0F AE /6 -> XSAVEOPT m
+48 0F AE /6 -> XSAVEOPT64 m

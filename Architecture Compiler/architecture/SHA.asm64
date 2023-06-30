@@ -1,0 +1,11 @@
+0F 38 C8 -> SHA1NEXTE xmm, xmm/m128
+
+0F 38 CB -> SHA256RNDS2 xmm, xmm/m128, xmm0
+
+0F 38 CC -> SHA256MSG1 xmm, xmm/m128
+0F 38 CD -> SHA256MSG2 xmm, xmm/m128
+
+0F 3A CC -> SHA1RNDS4 xmm, xmm/m128, imm8
+
+0F 38 C9 -> SHA1MSG1 xmm, xmm/m128
+0F 38 CA -> SHA1MSG2 xmm, xmm/m128

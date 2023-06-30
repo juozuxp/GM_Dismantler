@@ -1,5 +1,5 @@
 #pragma once
-#include <unordered_map>
+#include <map>
 #include "parser/DescriptorSet.hpp"
 #include "ByteEntry.hpp"
 #include "BytePackage.hpp"
@@ -22,5 +22,5 @@ private:
 
 private:
 	std::shared_ptr<ByteEntry> m_Bytes[256];
-	std::unordered_map<std::string, uint32_t> m_Types;
+	std::map<std::string, uint32_t> m_Types;
 };
