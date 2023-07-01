@@ -3,7 +3,7 @@
 
 int main()
 {
-	uint8_t code[] = { 0xD9, 0xFE };
+	uint8_t code[] = { 0x0F, 0x01, 0xC1 };
 
 	Disassembler instance;
 	Visualizer visualizer;
