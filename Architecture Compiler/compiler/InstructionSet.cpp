@@ -106,33 +106,10 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 
 	std::shared_ptr<FullRedirection> redirect;
 
-	bool x383A = false;
-
 	const std::vector<uint8_t>& bytes = descriptor.GetBytes();
 	for (uint8_t i = 0; i < bytes.size(); i++)
 	{
 		std::shared_ptr<ByteEntry>& entry = redirect ? redirect->Get(bytes[i]) : m_Bytes[bytes[i]];
-
-		if (redirect)
-		{
-			if (!x383A)
-			{
-				if (bytes[i] == 0x38)
-				{
-					redirections.push_back(Redirection::Entry::Entry(Redirection::Prefix::x0F38));
-					x383A = true;
-
-					continue;
-				}
-				else if (bytes[i] == 0x3A)
-				{
-					redirections.push_back(Redirection::Entry::Entry(Redirection::Prefix::x0F3A));
-					x383A = true;
-
-					continue;
-				}
-			}
-		}
 
 		if (!entry)
 		{
@@ -183,6 +160,22 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 		else if (type == ByteEntry::PackageType::FullRedirection)
 		{
 			redirect = std::reinterpret_pointer_cast<FullRedirection>(entry);
+
+			if (i < (bytes.size() - 1))
+			{
+				if (bytes[i + 1] == 0x38)
+				{
+					i++;
+					redirections.push_back(Redirection::Entry::Entry(Redirection::X0F383A::x0F38));
+					continue;
+				}
+				else if (bytes[i + 1] == 0x3A)
+				{
+					i++;
+					redirections.push_back(Redirection::Entry::Entry(Redirection::X0F383A::x0F3A));
+					continue;
+				}
+			}
 		}
 		else
 		{

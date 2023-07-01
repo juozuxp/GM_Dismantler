@@ -8,8 +8,8 @@ public:
 	{
 		Invalid,
 		Prefix,
-		Instruction,
 		Redirection,
+		Instruction,
 		FullRedirection
 	};
 

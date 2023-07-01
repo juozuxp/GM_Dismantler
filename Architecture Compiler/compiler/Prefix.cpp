@@ -33,18 +33,6 @@ Prefix::Prefix(uint16_t prefix) :
 		m_RedirectPrefix = Redirection::Prefix::x66;
 		return;
 	}
-
-	if (prefix & Type_x0F38)
-	{
-		m_RedirectPrefix = Redirection::Prefix::x0F38;
-		return;
-	}
-
-	if (prefix & Type_x0F3A)
-	{
-		m_RedirectPrefix = Redirection::Prefix::x0F3A;
-		return;
-	}
 }
 
 BytePackage Prefix::GetPackage(uint32_t freeSpace) const
@@ -69,7 +57,7 @@ void Prefix::SetStandAlone(uint16_t instructionType)
 
 bool Prefix::IsStandAlone()
 {
-	return m_Instruction != static_cast<uint16_t>(~0);
+	return m_Instruction != 0;
 }
 
 Prefix::PackageType Prefix::GetPackageType() const

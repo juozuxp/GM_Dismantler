@@ -15,6 +15,7 @@ public:
 private:
 	std::string GetEnumTypes() const;
 	std::string GetArrayByteCode() const;
+	std::string GetCoreStructures() const;
 	std::string GetArrayTypeStrings() const;
 
 private:

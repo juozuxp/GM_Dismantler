@@ -32,6 +32,7 @@ enum ILOperandScale : uint8_t
 	ILOperandScale_16,
 	ILOperandScale_32,
 	ILOperandScale_64,
+	ILOperandScale_80,
 	ILOperandScale_128,
 	ILOperandScale_256,
 	ILOperandScale_512
@@ -67,7 +68,7 @@ struct ILOperand
 				uint8_t m_BaseHigh : 1; // is register high
 			};
 
-			RegisterType m_Type;
+			Register m_Type;
 		} m_Register; // ILOperandType_Register
 
 		uint64_t m_Value; // if ILOperandType_MemoryAbsolute specified, [m_Value], if ILOperandType_MemoryRelative specified, [rip + m_Value], if ILOperandType_ValueRelative rip + m_Value
@@ -78,7 +79,7 @@ struct ILOperand
 #pragma pack(push, 1)
 struct ILInstruction
 {
-	InstructionType m_Type = Instruction_invalid;
+	InsType m_Type = InsType_invalid;
 	ILOperand m_Operands[4];
 };
 #pragma pack(pop)

@@ -632,7 +632,7 @@ void DescriptorOperand::ParseForGeneral(const std::string_view& variation)
 	}
 }
 
-void DescriptorOperand::AssignSize(VariationSize* mask, uint32_t size)
+void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 {
 	switch (size)
 	{

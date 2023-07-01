@@ -13,22 +13,20 @@ public:
 		Type_Repe = 1 << 2,
 		Type_Repne = 1 << 3,
 		Type_x66 = 1 << 4,
-		Type_x0F38 = 1 << 5,
-		Type_x0F3A = 1 << 6,
 
-		Type_Rex = 1 << 7,
-		Type_RexB = 1 << 8,
-		Type_RexX = 1 << 9,
-		Type_RexR = 1 << 10,
-		Type_GS = 1 << 11,
-		Type_FS = 1 << 12,
-		Type_Lock = 1 << 13
+		Type_Rex = 1 << 5,
+		Type_RexB = 1 << 6,
+		Type_RexX = 1 << 7,
+		Type_RexR = 1 << 8,
+		Type_GS = 1 << 9,
+		Type_FS = 1 << 10,
+		Type_Lock = 1 << 11
 	};
 
 #pragma pack(push, 1)
 	struct Package
 	{
-		uint16_t m_Instruction; // if pfx is fully redirect we can use it as an instruction for stand alone, ~0 if the pfx cannot be standalone
+		uint16_t m_Instruction; // if pfx is fully redirect we can use it as an instruction for stand alone, 0 if the pfx cannot be standalone
 		union
 		{
 			struct
@@ -38,8 +36,6 @@ public:
 				uint16_t m_REPZ : 1;
 				uint16_t m_REPNZ : 1;
 				uint16_t m_x66 : 1;
-				uint16_t m_x0F38 : 1;
-				uint16_t m_x0F3A : 1;
 
 				uint16_t m_REX : 1;
 				uint16_t m_REXB : 1;
@@ -74,7 +70,7 @@ private:
 
 private:
 	uint16_t m_Prefix = 0;
-	uint16_t m_Instruction = ~0;
+	uint16_t m_Instruction = 0;
 	Redirection::Prefix m_RedirectPrefix = Redirection::Prefix::Default;
 };
 

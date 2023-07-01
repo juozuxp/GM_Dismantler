@@ -12,10 +12,19 @@ public:
 	enum class Type : uint8_t
 	{
 		None,
+		X0F383A,
 		Prefix,
 		Mod,
 		Reg,
 		Mem
+	};
+
+	enum class X0F383A
+	{
+		Default,
+		x0F38,
+		x0F3A,
+		ArrayMAX
 	};
 
 	enum class Prefix : uint8_t
@@ -25,8 +34,6 @@ public:
 		Repe,
 		Repne,
 		x66,
-		x0F38,
-		x0F3A,
 		Default,
 		ArrayMAX
 	};
@@ -35,6 +42,7 @@ public:
 	{
 		Entry() = default;
 		Entry(Prefix prefix);
+		Entry(X0F383A x0F383A);
 		Entry(Type type, uint8_t index);
 
 		Type m_Type;
@@ -43,6 +51,7 @@ public:
 		{
 			Prefix m_Prefix;
 			uint8_t m_Index;
+			X0F383A m_X0F383A;
 		};
 	};
 
@@ -103,8 +112,6 @@ public:
 					uint32_t m_ValidRepe : 1;
 					uint32_t m_ValidRepne : 1;
 					uint32_t m_Valid66 : 1;
-					uint32_t m_Valid0F38 : 1;
-					uint32_t m_Valid0F3A : 1;
 					uint32_t m_ValidDefault : 1;
 
 					uint32_t m_IndexRexW : 3;
@@ -112,11 +119,23 @@ public:
 					uint32_t m_IndexRepe : 3;
 					uint32_t m_IndexRepne : 3;
 					uint32_t m_Index66 : 3;
-					uint32_t m_Index0F38 : 3;
-					uint32_t m_Index0F3A : 3;
 					uint32_t m_IndexDefault : 3;
 				};
 			} m_Prefix;
+			union
+			{
+				uint32_t m_Value;
+				struct
+				{
+					uint32_t m_ValidDefault : 1;
+					uint32_t m_Valid0F38 : 1;
+					uint32_t m_Valid0F3A : 1;
+
+					uint32_t m_IndexDefault : 2;
+					uint32_t m_Index0F38 : 2;
+					uint32_t m_Index0F3A : 2;
+				};
+			} m_x0F383A;
 		};
 	};
 #pragma pack(pop)

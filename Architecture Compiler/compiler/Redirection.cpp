@@ -8,6 +8,11 @@ Redirection::Entry::Entry(Prefix prefix) :
 {
 }
 
+Redirection::Entry::Entry(X0F383A x0F383A) :
+	m_Type(Type::X0F383A), m_X0F383A(x0F383A)
+{
+}
+
 Redirection::Entry::Entry(Type type, uint8_t index) : 
 	m_Type(type), m_Index(index)
 {
@@ -113,13 +118,24 @@ Redirection::Package Redirection::GetBasePackage(uint32_t freeSpace) const
 			}
 		}
 	} break;
+	case Type::X0F383A:
+	{
+		for (uint8_t i = 0; i < static_cast<uint8_t>(Prefix::ArrayMAX); i++)
+		{
+			if (m_Redirects[i])
+			{
+				package.m_x0F383A.m_Value |= (1 << i) | (index << ((i * 2) + 4)); // every 2 bits from 4 we insert an index
+				index++;
+			}
+		}
+	} break;
 	case Type::Mod:
 	{
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			if (m_Redirects[i])
 			{
-				package.m_Prefix.m_Value |= (1 << i) | (index << ((i * 2) + 4)); // every 2 bits from 4 we insert an index
+				package.m_Mod.m_Value |= (1 << i) | (index << ((i * 2) + 4)); // every 2 bits from 4 we insert an index
 				index++;
 			}
 		}
@@ -130,7 +146,7 @@ Redirection::Package Redirection::GetBasePackage(uint32_t freeSpace) const
 		{
 			if (m_Redirects[i])
 			{
-				package.m_Prefix.m_Value |= (1 << i) | (index << ((i * 3) + 8)); // every 3 bits from 8 we insert an index
+				package.m_RegRM.m_Value |= (1 << i) | (index << ((i * 3) + 8)); // every 3 bits from 8 we insert an index
 				index++;
 			}
 		}
@@ -154,6 +170,12 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 	if (redirect->m_Type == Type::Prefix)
 	{
 		redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)] = Insert(redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)], instruction);
+		return redirect;
+	}
+	
+	if (redirect->m_Type == Type::X0F383A)
+	{
+		redirect->m_Redirects[static_cast<uint8_t>(X0F383A::Default)] = Insert(redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)], instruction);
 		return redirect;
 	}
 	
@@ -212,6 +234,10 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 		{
 			redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)].swap(redirect->m_Redirects[0]);
 		}
+		else if (type == Type::X0F383A)
+		{
+			redirect->m_Redirects[static_cast<uint8_t>(X0F383A::Default)].swap(redirect->m_Redirects[0]);
+		}
 		else if (redirect->m_Type == Type::Mod)
 		{
 			for (uint8_t i = 1; i < 4; i++)
@@ -235,6 +261,12 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 		if (type == Type::Prefix)
 		{
 			newBase->m_Redirects[static_cast<uint8_t>(Prefix::Default)] = redirect;
+			return newBase;
+		}
+
+		if (type == Type::X0F383A)
+		{
+			newBase->m_Redirects[static_cast<uint8_t>(X0F383A::Default)] = redirect;
 			return newBase;
 		}
 
@@ -296,6 +328,12 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 					return redirect;
 				}
 
+				if (redirect->m_Type == Type::X0F383A)
+				{
+					redirect->m_Redirects[static_cast<uint8_t>(X0F383A::Default)] = Insert(redirect->m_Redirects[static_cast<uint8_t>(X0F383A::Default)], instruction, chain, length);
+					return redirect;
+				}
+
 				if (redirect->m_Type == Type::Mod)
 				{
 					for (uint8_t i = 0; i < 4; i++)
@@ -314,12 +352,6 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 				return redirect;
 			}
 		}
-	}
-
-	if (redirect->m_Type == Type::Prefix)
-	{
-		redirect->m_Redirects[chain[0].m_Index] = Insert(redirect->m_Redirects[chain[0].m_Index], instruction, chain + 1, length - 1);
-		return redirect;
 	}
 
 	uint8_t next = 0;
@@ -359,14 +391,6 @@ void Redirection::Sort(std::vector<Entry>& chain) // redirection chain -> pfx, m
 	for (uint8_t i = 1; i < chain.size(); i++)
 	{
 		for (uint8_t j = i; j > 0 && chain[j].m_Type < chain[j - 1].m_Type; j--)
-		{
-			std::swap(chain[j], chain[j - 1]);
-		}
-	}
-
-	for (uint8_t i = 1; i < chain.size(); i++)
-	{
-		for (uint8_t j = i; j > 0 && chain[j].m_Type == Type::Prefix && chain[j - 1].m_Type == Type::Prefix && chain[j].m_Prefix < chain[j - 1].m_Prefix; j--)
 		{
 			std::swap(chain[j], chain[j - 1]);
 		}

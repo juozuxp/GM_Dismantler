@@ -5,7 +5,7 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 {
 	for (const ILInstruction& instruction : instructions)
 	{
-		if (instruction.m_Type == Instruction_invalid)
+		if (instruction.m_Type == InsType_invalid)
 		{
 			printf("invalid\n");
 			continue;

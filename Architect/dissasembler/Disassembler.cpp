@@ -12,14 +12,15 @@ std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t 
 
 ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 {
-	const Package* core = reinterpret_cast<const Package*>(Architecture);
+	const Package* core = reinterpret_cast<const Package*>(CompiledPackage);
 
 	uint8_t mod = ~0;
 	uint8_t reg = ~0;
 	uint8_t mem = ~0;
 	uint8_t disp = 0;
 
-	PrefixPackage prefixes = {};
+	Prefix prefixes = {};
+	X0F383A x0F383A = {};
 
 	const Package* base = core;
 	const Package* package = &core[*instruction];
@@ -27,34 +28,59 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 	{
 		package = &base[*instruction];
 
-		if (package->m_Type == Package_FullRedirection)
+		if (package->m_Type == PaType::FullRedirect)
 		{
-			base = &base[package->m_FullRedirection.m_BaseIndex];
+			base = &base[package->m_FullRedirect.m_BaseIndex];
+
 			instruction++;
+			if (*instruction == 0x38)
+			{
+				x0F383A = X0F383A_0F38;
+				instruction++;
+			}
+			else if (*instruction == 0x3A)
+			{
+				x0F383A = X0F383A_0F3A;
+				instruction++;
+			}
+
 			continue;
 		}
 
-		if (package->m_Type == Package_Prefix)
+		if (package->m_Type == PaType::Prefix)
 		{
 			if (prefixes.m_REX)
 			{
 				return ILInstruction();
 			}
 
-			prefixes.m_Value |= package->m_Prefix.m_Value;
+			if (package->m_Prefix.m_Instruction != InsType_invalid)
+			{
+				if (prefixes.m_Instruction != InsType_invalid)
+				{
+					ILInstruction instruction;
+
+					instruction.m_Type = prefixes.m_Instruction;
+					return instruction;
+				}
+
+				prefixes.m_Instruction = package->m_Prefix.m_Instruction;
+			}
+
+			prefixes.m_Prefix |= package->m_Prefix.m_Prefix;
 			instruction++;
 			continue;
 		}
 
 		instruction++;
-		while (package->m_Type == Package_Redirection)
+		while (package->m_Type == PaType::Redirect)
 		{
-			const RedirectionPackage& redirect = package->m_Redirection;
+			const Redirect& redirect = package->m_Redirect;
 
-			if (redirect.m_Type == Redirect_Prefix)
+			if (redirect.m_Type == ReType::Prefix)
 			{
-				uint32_t value = redirect.m_Prefix.m_Value & ((Prefix_x0F3A << 1) - 1);
-				uint8_t count = CountToBit(prefixes.m_Value & value);
+				uint32_t value = redirect.m_Prefix.m_Value & ((Prefix_x66 << 1) - 1);
+				uint8_t count = CountToBit(prefixes.m_Prefix & value);
 
 				if (count == static_cast<uint8_t>(~0))
 				{
@@ -91,7 +117,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 				switch (redirect.m_Type)
 				{
-				case Redirect_Mem:
+				case ReType::Mem:
 				{
 					if (((redirect.m_RegRM.m_Value >> mem) & 1) != 0)
 					{
@@ -102,7 +128,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 						return ILInstruction();
 					}
 				} break;
-				case Redirect_Reg:
+				case ReType::Reg:
 				{
 					if (((redirect.m_RegRM.m_Value >> reg) & 1) != 0)
 					{
@@ -113,11 +139,22 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 						return ILInstruction();
 					}
 				} break;
-				case Redirect_Mod:
+				case ReType::Mod:
 				{
 					if (((redirect.m_Mod.m_Value >> mod) & 1) != 0)
 					{
-						index = ((redirect.m_Mod.m_Value >> 8) >> (mod * 2)) & ((1 << 2) - 1);
+						index = ((redirect.m_Mod.m_Value >> 4) >> (mod * 2)) & ((1 << 2) - 1);
+					}
+					else
+					{
+						return ILInstruction();
+					}
+				} break;
+				case ReType::X0F383A:
+				{
+					if (((redirect.m_x0F383A.m_Value >> x0F383A) & 1) != 0)
+					{
+						index = ((redirect.m_x0F383A.m_Value >> 4) >> (x0F383A * 2)) & ((1 << 2) - 1);
 					}
 					else
 					{
@@ -145,16 +182,16 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 	for (uint8_t i = 0; i < ARRAY_SIZE(package->m_Instruction.m_Operands); i++)
 	{
-		const OperandPackage& operand = package->m_Instruction.m_Operands[i];
+		const Operand& operand = package->m_Instruction.m_Operands[i];
 
-		if (operand.m_Type == Operand_none)
+		if (operand.m_Type == OpType::none)
 		{
 			break;
 		}
 
 		switch (operand.m_Type)
 		{
-		case Operand_modrm:
+		case OpType::modrm:
 		{
 			if (mem == static_cast<uint8_t>(~0))
 			{
@@ -172,7 +209,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				resolved.m_Operands[i].m_Register.m_Base = mem + base_extend;
 				resolved.m_Operands[i].m_Register.m_Type = operand.m_Register;
 
-				resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && operand.m_Size8 && mem >= 4;
+				resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && mem >= 4;
 
 				break;
 			}
@@ -263,7 +300,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			resolved.m_Operands[i].m_Memory.m_Base = mem + base_extend;
 			resolved.m_Operands[i].m_Memory.m_Index = IL_INVALID_REGISTER;
 		} break;
-		case Operand_reg:
+		case OpType::reg:
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_Register;
 
@@ -274,7 +311,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				if (operand.m_Rex)
 				{
 					resolved.m_Operands[i].m_Register.m_Base = operand.m_RegisterIndex + reg_extend;
-					resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && operand.m_Size8 && operand.m_RegisterIndex >= 4;
+					resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && operand.m_RegisterIndex >= 4;
 				}
 				else
 				{
@@ -294,7 +331,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			}
 
 			resolved.m_Operands[i].m_Register.m_Base = reg + reg_extend;
-			resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && operand.m_Size8 && reg >= 4;
+			resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && reg >= 4;
 		} break;
 		}
 	}
@@ -303,126 +340,155 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 	for (uint8_t i = 0; i < ARRAY_SIZE(package->m_Instruction.m_Operands); i++)
 	{
-		const OperandPackage& operand = package->m_Instruction.m_Operands[i];
+		const Operand& operand = package->m_Instruction.m_Operands[i];
 
-		if (operand.m_Type == Operand_none)
+		if (operand.m_Type == OpType::none)
 		{
 			break;
 		}
 
-		switch (operand.m_Type)
+		if (operand.m_Type == OpType::imm)
 		{
-		case Operand_imm:
-		{
-			if (operand.m_Size8)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_Value;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint8_t*>(instruction);
-
-				instruction += 1;
-			}
-			else if (operand.m_Size32)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_Value;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction);
-
-				instruction += 4;
-			}
-			else if (operand.m_Size16)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_Value;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
-
-				instruction += 2;
-			}
-			else if (operand.m_Size64)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_Value;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
-
-				instruction += 8;
-			}
-		} break;
-		case Operand_rel:
-		{
-			if (operand.m_Size8)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint8_t*>(instruction);
-
-				instruction += 1;
-			}
-			else if (operand.m_Size32)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction);
-
-				instruction += 4;
-			}
-			else if (operand.m_Size16)
-			{
-				resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
-
-				instruction += 2;
-			}
-		} break;
+			resolved.m_Operands[i].m_Type = ILOperandType_Value;
 		}
-	}
-
-	for (uint8_t i = 0; i < ARRAY_SIZE(package->m_Instruction.m_Operands); i++)
-	{
-		const OperandPackage& operand = package->m_Instruction.m_Operands[i];
-
-		if (operand.m_Type == Operand_none)
+		else if (operand.m_Type == OpType::rel)
 		{
-			break;
-		}
-
-		if (operand.m_Size8)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_8;
-			continue;
-		}
-		else if (operand.m_Size32)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_32;
-		}
-		else if (operand.m_Size64)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_64;
-		}
-		else if (operand.m_Size16)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_16;
-		}
-		else if (operand.m_Size128)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_128;
-			continue;
-		}
-		else if (operand.m_Size256)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_256;
-			continue;
-		}
-		else if (operand.m_Size512)
-		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_512;
-			continue;
+			resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
 		}
 		else
 		{
 			continue;
 		}
 
-		if (operand.m_Size64 && prefixes.m_REXW)
+		switch (operand.m_Mem.m_Size)
+		{
+		case OpSize::base_8:
+		{
+			resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint8_t*>(instruction);
+			instruction += 1;
+		} break;
+		case OpSize::base_16:
+		{
+			if (operand.m_Mem.m_Override1 && prefixes.m_x66)
+			{
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction);
+				instruction += 4;
+			}
+			else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
+			{
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
+				instruction += 8;
+			}
+			else
+			{
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
+				instruction += 2;
+			}
+		} break;
+		case OpSize::base_32:
+		{
+			if (operand.m_Mem.m_Override1 && prefixes.m_x66)
+			{
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
+				instruction += 2;
+			}
+			else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
+			{
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
+				instruction += 8;
+			}
+			else
+			{
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction);
+				instruction += 4;
+			}
+		} break;
+		default:
+		{
+			resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
+			instruction += 8;
+		} break;
+		}
+	}
+
+	for (uint8_t i = 0; i < ARRAY_SIZE(package->m_Instruction.m_Operands); i++)
+	{
+		const Operand& operand = package->m_Instruction.m_Operands[i];
+
+		if (operand.m_Type == OpType::none)
+		{
+			break;
+		}
+
+		const OperandSize* size = &operand.m_Mem;
+		if (operand.m_Type == OpType::modrm)
+		{
+			if (mod == 3)
+			{
+				size = &operand.m_Reg;
+			}
+		}
+		else if (operand.m_Type == OpType::reg)
+		{
+			size = &operand.m_Reg;
+		}
+
+		switch (size->m_Size)
+		{
+		case OpSize::base_8:
+		{
+			resolved.m_Operands[i].m_Scale = ILOperandScale_8;
+		} break;
+		case OpSize::base_16:
+		{
+			if (size->m_Override1 && prefixes.m_x66)
+			{
+				resolved.m_Operands[i].m_Scale = ILOperandScale_32;
+			}
+			else if (size->m_Override2 && prefixes.m_REXW)
+			{
+				resolved.m_Operands[i].m_Scale = ILOperandScale_64;
+			}
+			else
+			{
+				resolved.m_Operands[i].m_Scale = ILOperandScale_16;
+			}
+		} break;
+		case OpSize::base_32:
+		{
+			if (size->m_Override1 && prefixes.m_x66)
+			{
+				resolved.m_Operands[i].m_Scale = ILOperandScale_16;
+			}
+			else if (size->m_Override2 && prefixes.m_REXW)
+			{
+				resolved.m_Operands[i].m_Scale = ILOperandScale_64;
+			}
+			else
+			{
+				resolved.m_Operands[i].m_Scale = ILOperandScale_32;
+			}
+		} break;
+		case OpSize::base_64:
 		{
 			resolved.m_Operands[i].m_Scale = ILOperandScale_64;
-		}
-		else if (operand.m_Size16 && prefixes.m_x66)
+		} break;
+		case OpSize::base_80:
 		{
-			resolved.m_Operands[i].m_Scale = ILOperandScale_16;
+			resolved.m_Operands[i].m_Scale = ILOperandScale_80;
+		} break;
+		case OpSize::base_128:
+		{
+			resolved.m_Operands[i].m_Scale = ILOperandScale_128;
+		} break;
+		case OpSize::base_256:
+		{
+			resolved.m_Operands[i].m_Scale = ILOperandScale_256;
+		} break;
+		case OpSize::base_512:
+		{
+			resolved.m_Operands[i].m_Scale = ILOperandScale_512;
+		} break;
 		}
 	}
 

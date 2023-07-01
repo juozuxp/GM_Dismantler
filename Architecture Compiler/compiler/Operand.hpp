@@ -31,8 +31,8 @@ public:
 			uint8_t m_RegisterIndex : 4;
 		};
 
-		DescriptorOperand::VariationSize m_Reg;
-		DescriptorOperand::VariationSize m_Mem;
+		DescriptorOperand::OperandSize m_Reg;
+		DescriptorOperand::OperandSize m_Mem;
 	};
 #pragma pack(pop)
 

@@ -76,7 +76,7 @@ public:
 		uint8_t m_Value = 0;
 	};
 
-	struct VariationSize
+	struct OperandSize
 	{
 		Size m_Size : 6;
 
@@ -88,8 +88,8 @@ public:
 	{
 		struct
 		{
-			VariationSize m_Reg;
-			VariationSize m_Mem;
+			OperandSize m_Reg;
+			OperandSize m_Mem;
 		};
 
 		uint16_t m_Value = 0;
@@ -117,7 +117,7 @@ private:
 
 	uint8_t ParseSize(const std::string_view& variation);
 
-	void AssignSize(VariationSize* mask, uint32_t size);
+	void AssignSize(OperandSize* mask, uint32_t size);
 
 private:
 	TypeMask m_Type = {};
