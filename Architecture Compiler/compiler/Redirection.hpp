@@ -113,6 +113,7 @@ public:
 					uint32_t m_ValidRepne : 1;
 					uint32_t m_Valid66 : 1;
 					uint32_t m_ValidDefault : 1;
+					uint32_t m_ValidUnused : 2;
 
 					uint32_t m_IndexRexW : 3;
 					uint32_t m_IndexWait : 3;
@@ -130,6 +131,7 @@ public:
 					uint32_t m_ValidDefault : 1;
 					uint32_t m_Valid0F38 : 1;
 					uint32_t m_Valid0F3A : 1;
+					uint32_t m_ValidUnused : 1;
 
 					uint32_t m_IndexDefault : 2;
 					uint32_t m_Index0F38 : 2;

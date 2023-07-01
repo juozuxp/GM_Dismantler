@@ -71,7 +71,7 @@ BytePackage Redirection::GetPackage(uint32_t freeSpace) const
 {
 	BytePackage package = BytePackage(GetBasePackage(freeSpace));
 
-	uint8_t count = m_Type == Type::Prefix ? static_cast<uint8_t>(Prefix::ArrayMAX) : (m_Type == Type::Mod ? 4 : ARRAY_SIZE(m_Redirects));
+	uint8_t count = m_Type == Type::Prefix ? static_cast<uint8_t>(Prefix::ArrayMAX) : (m_Type == Type::X0F383A ? static_cast<uint8_t>(X0F383A::ArrayMAX) : (m_Type == Type::Mod ? 4 : ARRAY_SIZE(m_Redirects)));
 	for (uint8_t i = 0; i < count; i++)
 	{
 		if (m_Redirects[i])

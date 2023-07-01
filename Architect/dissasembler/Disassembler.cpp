@@ -84,7 +84,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 				if (count == static_cast<uint8_t>(~0))
 				{
-					if (redirect.m_Prefix.m_ValidDefault)
+					if (!redirect.m_Prefix.m_ValidDefault)
 					{
 						return ILInstruction();
 					}
