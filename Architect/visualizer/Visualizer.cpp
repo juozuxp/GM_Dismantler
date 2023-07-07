@@ -95,7 +95,7 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 			} break;
 			case ILOperandType_ValueRelative:
 			{
-				uint64_t value = 0;
+				uint32_t value = 0;
 				bool sign = false;
 
 				switch (operand.m_Scale)
@@ -127,35 +127,10 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 			} break;
 			case ILOperandType_MemoryRelative:
 			{
-				uint64_t value = 0;
-				bool sign = false;
+				int32_t convert = static_cast<int32_t>(operand.m_Value);
+				bool sign = convert < 0;
 
-				switch (operand.m_Scale)
-				{
-				case ILOperandScale_8:
-				{
-					int8_t convert = static_cast<int8_t>(operand.m_Value);
-
-					sign = convert < 0;
-					value = sign ? -convert : convert;
-				} break;
-				case ILOperandScale_16:
-				{
-					int16_t convert = static_cast<int16_t>(operand.m_Value);
-
-					sign = convert < 0;
-					value = sign ? -convert : convert;
-				} break;
-				case ILOperandScale_32:
-				{
-					int32_t convert = static_cast<int32_t>(operand.m_Value);
-
-					sign = convert < 0;
-					value = sign ? -convert : convert;
-				} break;
-				}
-
-				printf("[rip %c %X]", sign ? '-' : '+', value);
+				printf("[rip %c %X]", sign ? '-' : '+', sign ? -convert : convert);
 			} break;
 			case ILOperandType_MemoryAbsolute:
 			{

@@ -351,7 +351,7 @@ F7 /5 -> IMUL r/m32|16|64
 0F AF -> IMUL r32|16|64, r/m32|16|64
 
 6B -> IMUL r32|16|64, r/m32|16|64, imm8
-69 -> IMUL r32|16|64, r/m32|16|64, imm16
+69 -> IMUL r32|16|64, r/m32|16|64, imm32|16
 
 E4 -> IN AL, imm8
 E5 -> IN AX|EAX, imm8
@@ -485,7 +485,7 @@ BE -> MOV ESI|SI|RSI|REX, imm32|16|64
 BF -> MOV EDI|DI|RDI|REX, imm32|16|64
 
 C6 /0 -> MOV r/m8, imm8
-C7 /0 -> MOV r/m32|16|64, imm32|16|64
+C7 /0 -> MOV r/m32|16|64, imm32|16
 
 0F 20 -> MOV r64, cr
 0F 22 -> MOV cr, r64
@@ -612,35 +612,29 @@ C1 /1 -> ROR r/m32|16|64, imm8
 C1 /2 -> RCL r/m32|16|64, imm8
 C1 /3 -> RCR r/m32|16|64, imm8
 
-D0 /4 -> SAL r/m8, 1
-D0 /5 -> SAR r/m8, 1
-D0 /6 -> SHL r/m8, 1
-D0 /7 -> SHR r/m8, 1
+D0 /4 -> SHL r/m8, 1
+D0 /5 -> SHR r/m8, 1
+D0 /7 -> SAR r/m8, 1
 
-D2 /4 -> SAL r/m8, CL
-D2 /5 -> SAR r/m8, CL
-D2 /6 -> SHL r/m8, CL
-D2 /7 -> SHR r/m8, CL
+D2 /4 -> SHL r/m8, CL
+D2 /5 -> SHR r/m8, CL
+D2 /7 -> SAR r/m8, CL
 
-C0 /4 -> SAL r/m8, imm8
-C0 /5 -> SAR r/m8, imm8
-C0 /6 -> SHL r/m8, imm8
-C0 /7 -> SHR r/m8, imm8
+C0 /4 -> SHL r/m8, imm8
+C0 /5 -> SHR r/m8, imm8
+C0 /7 -> SAR r/m8, imm8
 
-D1 /4 -> SAL r/m32|16|64, 1
-D1 /5 -> SAR r/m32|16|64, 1
-D1 /6 -> SHL r/m32|16|64, 1
-D1 /7 -> SHR r/m32|16|64, 1
+D1 /4 -> SHL r/m32|16|64, 1
+D1 /5 -> SHR r/m32|16|64, 1
+D1 /7 -> SAR r/m32|16|64, 1
 
-D3 /4 -> SAL r/m32|16|64, CL
-D3 /5 -> SAR r/m32|16|64, CL
-D3 /6 -> SHL r/m32|16|64, CL
-D3 /7 -> SHR r/m32|16|64, CL
+D3 /4 -> SHL r/m32|16|64, CL
+D3 /5 -> SHR r/m32|16|64, CL
+D3 /7 -> SAR r/m32|16|64, CL
 
-C1 /4 -> SAL r/m32|16|64, imm8
-C1 /5 -> SAR r/m32|16|64, imm8
-C1 /6 -> SHL r/m32|16|64, imm8
-C1 /7 -> SHR r/m32|16|64, imm8
+C1 /4 -> SHL r/m32|16|64, imm8
+C1 /5 -> SHR r/m32|16|64, imm8
+C1 /7 -> SAR r/m32|16|64, imm8
 
 0F 32 -> RDMSR
 0F 33 -> RDPMC
@@ -739,6 +733,7 @@ AB -> STOSD
 A8 -> TEST AL, imm8
 A9 -> TEST EAX|AX|RAX, imm32|16
 
+F6 /0 -> TEST r/m8, imm8
 F7 /0 -> TEST r/m32|16|64, imm32|16
 
 84 -> TEST r/m8, r8

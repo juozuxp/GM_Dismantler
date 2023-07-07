@@ -5,7 +5,14 @@ std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t 
 {
 	std::vector<ILInstruction> instructions;
 
-	instructions.push_back(Disassemble(reinterpret_cast<const uint8_t*>(base)));
+	ILInstruction instruction = {};
+
+	uint8_t instructionSize = 0;
+	for (uint32_t i = 0; i < size; i += instruction.m_Size)
+	{
+		instruction = Disassemble(reinterpret_cast<const uint8_t*>(base) + i);
+		instructions.push_back(instruction);
+	}
 
 	return instructions;
 }
@@ -13,6 +20,9 @@ std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t 
 ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 {
 	const Package* core = reinterpret_cast<const Package*>(CompiledPackage);
+	const uint8_t* bytes = instruction;
+
+	ILInstruction resolved = {};
 
 	uint8_t mod = ~0;
 	uint8_t reg = ~0;
@@ -20,28 +30,28 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 	uint8_t disp = 0;
 
 	Prefix prefixes = {};
-	X0F383A x0F383A = {};
+	X0F383A x0F383A = X0F383A_None;
 
 	const Package* base = core;
-	const Package* package = &core[*instruction];
+	const Package* package = &core[*bytes];
 	while (true)
 	{
-		package = &base[*instruction];
+		package = &base[*bytes];
 
 		if (package->m_Type == PaType::FullRedirect)
 		{
 			base = &base[package->m_FullRedirect.m_BaseIndex];
 
-			instruction++;
-			if (*instruction == 0x38)
+			bytes++;
+			if (*bytes == 0x38)
 			{
 				x0F383A = X0F383A_0F38;
-				instruction++;
+				bytes++;
 			}
-			else if (*instruction == 0x3A)
+			else if (*bytes == 0x3A)
 			{
 				x0F383A = X0F383A_0F3A;
-				instruction++;
+				bytes++;
 			}
 
 			continue;
@@ -51,28 +61,29 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		{
 			if (prefixes.m_REX)
 			{
-				return ILInstruction();
+				resolved.m_Size = 1;
+				return resolved;
 			}
 
 			if (package->m_Prefix.m_Instruction != InsType_invalid)
 			{
 				if (prefixes.m_Instruction != InsType_invalid)
 				{
-					ILInstruction instruction;
+					ILInstruction bytes;
 
-					instruction.m_Type = prefixes.m_Instruction;
-					return instruction;
+					bytes.m_Type = prefixes.m_Instruction;
+					return bytes;
 				}
 
 				prefixes.m_Instruction = package->m_Prefix.m_Instruction;
 			}
 
 			prefixes.m_Prefix |= package->m_Prefix.m_Prefix;
-			instruction++;
+			bytes++;
 			continue;
 		}
 
-		instruction++;
+		bytes++;
 		while (package->m_Type == PaType::Redirect)
 		{
 			const Redirect& redirect = package->m_Redirect;
@@ -86,7 +97,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				{
 					if (!redirect.m_Prefix.m_ValidDefault)
 					{
-						return ILInstruction();
+						resolved.m_Size = 1;
+						return resolved;
 					}
 
 					package = &core[redirect.m_BaseIndex + redirect.m_Prefix.m_IndexDefault];
@@ -99,14 +111,28 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				}
 				else
 				{
-					return ILInstruction();
+					resolved.m_Size = 1;
+					return resolved;
+				}
+			}
+			else if (redirect.m_Type == ReType::X0F383A)
+			{
+				if (((redirect.m_x0F383A.m_Value >> x0F383A) & 1) != 0)
+				{
+					uint8_t index = ((redirect.m_x0F383A.m_Value >> 4) >> (x0F383A * 2)) & ((1 << 2) - 1);
+					package = &core[redirect.m_BaseIndex + index];
+				}
+				else
+				{
+					resolved.m_Size = 1;
+					return resolved;
 				}
 			}
 			else
 			{
 				if (mem == static_cast<uint8_t>(~0))
 				{
-					uint8_t modrrm = *instruction;
+					uint8_t modrrm = *bytes;
 
 					mem = (modrrm >> 0) & ((1 << 3) - 1);
 					reg = (modrrm >> 3) & ((1 << 3) - 1);
@@ -125,7 +151,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 					}
 					else
 					{
-						return ILInstruction();
+						resolved.m_Size = 1;
+						return resolved;
 					}
 				} break;
 				case ReType::Reg:
@@ -136,7 +163,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 					}
 					else
 					{
-						return ILInstruction();
+						resolved.m_Size = 1;
+						return resolved;
 					}
 				} break;
 				case ReType::Mod:
@@ -147,18 +175,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 					}
 					else
 					{
-						return ILInstruction();
-					}
-				} break;
-				case ReType::X0F383A:
-				{
-					if (((redirect.m_x0F383A.m_Value >> x0F383A) & 1) != 0)
-					{
-						index = ((redirect.m_x0F383A.m_Value >> 4) >> (x0F383A * 2)) & ((1 << 2) - 1);
-					}
-					else
-					{
-						return ILInstruction();
+						resolved.m_Size = 1;
+						return resolved;
 					}
 				} break;
 				}
@@ -169,8 +187,6 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 		break;
 	}
-
-	ILInstruction resolved = {};
 
 	uint8_t sib_base = ~0;
 	uint8_t sib_scale = ~0;
@@ -195,7 +211,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		{
 			if (mem == static_cast<uint8_t>(~0))
 			{
-				uint8_t modrrm = *instruction;
+				uint8_t modrrm = *bytes;
 
 				mem = (modrrm >> 0) & ((1 << 3) - 1);
 				reg = (modrrm >> 3) & ((1 << 3) - 1);
@@ -224,7 +240,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 				if (sib_base == static_cast<uint8_t>(~0))
 				{
-					uint8_t sib = *(instruction + 1);
+					uint8_t sib = *(bytes + 1);
 
 					sib_base = (sib >> 0) & ((1 << 3) - 1);
 					sib_index = (sib >> 3) & ((1 << 3) - 1);
@@ -240,14 +256,14 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 						if (sib_index == 4)
 						{
 							resolved.m_Operands[i].m_Type = ILOperandType_MemoryAbsolute;
-							resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction + 2);
+							resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(bytes + 2);
 
 							break;
 						}
 						else
 						{
 							resolved.m_Operands[i].m_Memory.m_Base = IL_INVALID_REGISTER;
-							resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(instruction + 2);
+							resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(bytes + 2);
 						}
 					}
 					else
@@ -258,12 +274,12 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				else if (mod == 1)
 				{
 					disp = 1;
-					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(instruction + 2);
+					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(bytes + 2);
 				}
 				else if (mod == 2)
 				{
 					disp = 4;
-					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(instruction + 2);
+					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(bytes + 2);
 				}
 
 				if (sib_index == 4)
@@ -283,18 +299,18 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				disp = 4;
 
 				resolved.m_Operands[i].m_Type = ILOperandType_MemoryRelative;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction + 1);
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(bytes + 1);
 				break;
 			}
 			else if (mod == 1)
 			{
 				disp = 1;
-				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(instruction + 1);
+				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(bytes + 1);
 			}
 			else if (mod == 2)
 			{
 				disp = 4;
-				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(instruction + 1);
+				resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(bytes + 1);
 			}
 
 			resolved.m_Operands[i].m_Memory.m_Base = mem + base_extend;
@@ -323,7 +339,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 			if (mem == static_cast<uint8_t>(~0))
 			{
-				uint8_t modrrm = *instruction;
+				uint8_t modrrm = *bytes;
 
 				mem = (modrrm >> 0) & ((1 << 3) - 1);
 				reg = (modrrm >> 3) & ((1 << 3) - 1);
@@ -336,7 +352,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		}
 	}
 
-	instruction += ((sib_base != static_cast<uint8_t>(~0)) ? 1 : 0) + ((mem != static_cast<uint8_t>(~0)) ? 1 : 0) + disp;
+	bytes += ((sib_base != static_cast<uint8_t>(~0)) ? 1 : 0) + ((mem != static_cast<uint8_t>(~0)) ? 1 : 0) + disp;
 
 	for (uint8_t i = 0; i < ARRAY_SIZE(package->m_Instruction.m_Operands); i++)
 	{
@@ -360,53 +376,59 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			continue;
 		}
 
+		if (operand.m_Constant)
+		{
+			resolved.m_Operands[i].m_Value = operand.m_RegisterIndex;
+			continue;
+		}
+
 		switch (operand.m_Mem.m_Size)
 		{
 		case OpSize::base_8:
 		{
-			resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint8_t*>(instruction);
-			instruction += 1;
+			resolved.m_Operands[i].m_Value = *reinterpret_cast<const int8_t*>(bytes);
+			bytes += 1;
 		} break;
 		case OpSize::base_16:
 		{
 			if (operand.m_Mem.m_Override1 && prefixes.m_x66)
 			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction);
-				instruction += 4;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int32_t*>(bytes);
+				bytes += 4;
 			}
 			else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
 			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
-				instruction += 8;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int64_t*>(bytes);
+				bytes += 8;
 			}
 			else
 			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
-				instruction += 2;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int16_t*>(bytes);
+				bytes += 2;
 			}
 		} break;
 		case OpSize::base_32:
 		{
 			if (operand.m_Mem.m_Override1 && prefixes.m_x66)
 			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint16_t*>(instruction);
-				instruction += 2;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int16_t*>(bytes);
+				bytes += 2;
 			}
 			else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
 			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
-				instruction += 8;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int64_t*>(bytes);
+				bytes += 8;
 			}
 			else
 			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(instruction);
-				instruction += 4;
+				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int32_t*>(bytes);
+				bytes += 4;
 			}
 		} break;
 		default:
 		{
-			resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint64_t*>(instruction);
-			instruction += 8;
+			resolved.m_Operands[i].m_Value = *reinterpret_cast<const int64_t*>(bytes);
+			bytes += 8;
 		} break;
 		}
 	}
@@ -492,6 +514,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		}
 	}
 
+	resolved.m_Size = bytes - instruction;
 	resolved.m_Type = package->m_Instruction.m_Type;
 	return resolved;
 }

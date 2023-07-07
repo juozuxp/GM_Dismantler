@@ -39,7 +39,7 @@ enum ILOperandScale : uint8_t
 };
 #pragma pack(pop)
 
-#define IL_INVALID_REGISTER static_cast<uint8_t>((1 << 7) - 1)
+#define IL_INVALID_REGISTER static_cast<uint8_t>((1 << 5) - 1)
 
 #pragma pack(push, 1)
 struct ILOperand 
@@ -53,6 +53,7 @@ struct ILOperand
 	{
 		struct
 		{
+			uint8_t m_Segment; // segment index, IL_INVALID_REGISTER - reserved for none
 			ILMemoryScaler m_Scale;
 
 			uint8_t m_Base; // register index, IL_INVALID_REGISTER - reserved for none
@@ -80,6 +81,7 @@ struct ILOperand
 struct ILInstruction
 {
 	InsType m_Type = InsType_invalid;
+	uint8_t m_Size;
 	ILOperand m_Operands[4];
 };
 #pragma pack(pop)

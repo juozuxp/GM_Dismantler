@@ -4,9 +4,6 @@
 
 class Disassembler
 {
-private:
-
-
 public:
 	std::vector<ILInstruction> Disassemble(const void* base, uint32_t size);
 
