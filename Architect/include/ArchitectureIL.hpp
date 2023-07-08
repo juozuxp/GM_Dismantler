@@ -72,7 +72,7 @@ struct ILOperand
 			Register m_Type;
 		} m_Register; // ILOperandType_Register
 
-		uint64_t m_Value; // if ILOperandType_MemoryAbsolute specified, [m_Value], if ILOperandType_MemoryRelative specified, [rip + m_Value], if ILOperandType_ValueRelative rip + m_Value
+		int64_t m_Value; // if ILOperandType_MemoryAbsolute specified, [m_Value], if ILOperandType_MemoryRelative specified, [rip + m_Value], if ILOperandType_ValueRelative rip + m_Value
 	};
 };
 #pragma pack(pop)

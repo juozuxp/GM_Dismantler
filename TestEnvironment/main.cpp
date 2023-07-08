@@ -31,16 +31,16 @@ int main()
 	Visualizer visualizer;
 
 
-	HMODULE kernel32 = GetModuleHandleA("Kernel32.dll");
-	const IMAGE_SECTION_HEADER* section = GetSection(kernel32, ".text");
+	HMODULE module = LoadLibraryA("ntdll.dll");
+	const IMAGE_SECTION_HEADER* section = GetSection(module, ".text");
 
-	std::vector<ILInstruction> instructions = instance.Disassemble(reinterpret_cast<const uint8_t*>(kernel32) + section->VirtualAddress, section->Misc.VirtualSize);
+	std::vector<ILInstruction> instructions = instance.Disassemble(reinterpret_cast<const uint8_t*>(module) + section->VirtualAddress, section->Misc.VirtualSize);
 
 
-	printf("%p\n", kernel32);
+	printf("%p\n", module);
 
 	uint64_t index = 0;
-	uint64_t cursor = reinterpret_cast<uint64_t>(kernel32) + section->VirtualAddress;
+	uint64_t cursor = reinterpret_cast<uint64_t>(module) + section->VirtualAddress;
 	for (const ILInstruction& instruction : instructions)
 	{
 		if (instruction.m_Type == InsType_invalid)

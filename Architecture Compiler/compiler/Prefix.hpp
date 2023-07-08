@@ -6,7 +6,7 @@
 class Prefix : public ByteEntry
 {
 public:
-	enum Type : uint16_t
+	enum Type : uint32_t
 	{
 		Type_RexW = 1 << 0,
 		Type_Wait = 1 << 1,
@@ -18,9 +18,15 @@ public:
 		Type_RexB = 1 << 6,
 		Type_RexX = 1 << 7,
 		Type_RexR = 1 << 8,
-		Type_GS = 1 << 9,
-		Type_FS = 1 << 10,
-		Type_Lock = 1 << 11
+		Type_Lock = 1 << 9,
+		Type_x67 = 1 << 10,
+
+		Type_CS = 1 << 11,
+		Type_SS = 1 << 12,
+		Type_DS = 1 << 13,
+		Type_ES = 1 << 14,
+		Type_GS = 1 << 15,
+		Type_FS = 1 << 16,
 	};
 
 #pragma pack(push, 1)
@@ -31,21 +37,27 @@ public:
 		{
 			struct
 			{
-				uint16_t m_REXW : 1;
-				uint16_t m_WAIT : 1;
-				uint16_t m_REPZ : 1;
-				uint16_t m_REPNZ : 1;
-				uint16_t m_x66 : 1;
+				uint32_t m_REXW : 1;
+				uint32_t m_WAIT : 1;
+				uint32_t m_REPZ : 1;
+				uint32_t m_REPNZ : 1;
+				uint32_t m_x66 : 1;
 
-				uint16_t m_REX : 1;
-				uint16_t m_REXB : 1;
-				uint16_t m_REXX : 1;
-				uint16_t m_REXR : 1;
-				uint16_t m_GS : 1;
-				uint16_t m_FS : 1;
-				uint16_t m_LOCK : 1;
+				uint32_t m_REX : 1;
+				uint32_t m_REXB : 1;
+				uint32_t m_REXX : 1;
+				uint32_t m_REXR : 1;
+				uint32_t m_LOCK : 1;
+				uint32_t m_x67 : 1;
+
+				uint32_t m_CS : 1;
+				uint32_t m_SS : 1;
+				uint32_t m_DS : 1;
+				uint32_t m_ES : 1;
+				uint32_t m_GS : 1;
+				uint32_t m_FS : 1;
 			};
-			uint16_t m_Prefix;
+			uint32_t m_Prefix;
 		};
 	};
 #pragma pack(pop)

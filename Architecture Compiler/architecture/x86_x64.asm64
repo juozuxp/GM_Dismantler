@@ -766,17 +766,18 @@ F7 /0 -> TEST r/m32|16|64, imm32|16
 0F 01 D0 -> XGETBV
 D7 -> XLATB
 
-34 -> XOR AL, imm8
-35 -> XOR EAX|AX|RAX, imm32|16
-
-80 /6 -> XOR r/m8, imm8
-81 /6 -> XOR r/m32|16|64, imm32|16
-
 30 -> XOR r/m8, r8
 31 -> XOR r/m32|16|64, r32|16|64
 
 32 -> XOR r8, r/m8
 33 -> XOR r32|16|64, r/m32|16|64
+
+34 -> XOR AL, imm8
+35 -> XOR EAX|AX|RAX, imm32|16
+
+80 /6 -> XOR r/m8, imm8
+81 /6 -> XOR r/m32|16|64, imm32|16
+83 /6 -> XOR r/m32|16|64, imm8
 
 0F 01 D1 -> XSETBV
 

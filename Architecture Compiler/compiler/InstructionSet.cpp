@@ -190,6 +190,11 @@ void InstructionSet::CreateCoreBytes()
 
 	m_Bytes[0x0F] = subSet;
 
+	m_Bytes[0x26] = std::make_shared<Prefix>(Prefix::Type_ES);
+	m_Bytes[0x2E] = std::make_shared<Prefix>(Prefix::Type_CS);
+	m_Bytes[0x36] = std::make_shared<Prefix>(Prefix::Type_SS);
+	m_Bytes[0x3E] = std::make_shared<Prefix>(Prefix::Type_DS);
+
 	m_Bytes[0x40] = std::make_shared<Prefix>(Prefix::Type_Rex);
 
 	m_Bytes[0x41] = std::make_shared<Prefix>(Prefix::Type_Rex | Prefix::Type_RexB);
@@ -213,6 +218,7 @@ void InstructionSet::CreateCoreBytes()
 	m_Bytes[0x64] = std::make_shared<Prefix>(Prefix::Type_FS);
 	m_Bytes[0x65] = std::make_shared<Prefix>(Prefix::Type_GS);
 	m_Bytes[0x66] = std::make_shared<Prefix>(Prefix::Type_x66);
+	m_Bytes[0x67] = std::make_shared<Prefix>(Prefix::Type_x67);
 
 	m_Bytes[0x9B] = std::make_shared<Prefix>(Prefix::Type_Wait);
 
