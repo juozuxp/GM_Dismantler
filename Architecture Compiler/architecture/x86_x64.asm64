@@ -668,6 +668,8 @@ AE -> SCASB
 AF -> SCASD
 48 AF -> SCASQ
 
+9E -> SAHF
+
 0F 90 -> SETO r/m8
 0F 91 -> SETNO r/m8
 0F 92 -> SETB r/m8

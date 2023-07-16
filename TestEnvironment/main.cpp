@@ -31,7 +31,7 @@ int main()
 	Visualizer visualizer;
 
 
-	HMODULE module = LoadLibraryA("ntdll.dll");
+	HMODULE module = LoadLibraryA("d3d11.dll");
 	const IMAGE_SECTION_HEADER* section = GetSection(module, ".text");
 
 	std::vector<ILInstruction> instructions = instance.Disassemble(reinterpret_cast<const uint8_t*>(module) + section->VirtualAddress, section->Misc.VirtualSize);
@@ -45,7 +45,7 @@ int main()
 	{
 		if (instruction.m_Type == InsType_invalid)
 		{
-			printf("Invalid at: %p\n", cursor);
+			printf("Invalid at: %p, byte: %02X\n", cursor, *reinterpret_cast<uint8_t*>(cursor));
 		}
 
 		index++;
