@@ -42,7 +42,7 @@ Redirection::Redirection(const Redirection& copy)
 
 Redirection& Redirection::operator=(const Redirection& copy)
 {
-	for (uint8_t i = 1; i < ARRAY_SIZE(m_Redirects); i++)
+	for (uint8_t i = 0; i < ARRAY_SIZE(m_Redirects); i++)
 	{
 		if (!copy.m_Redirects[i])
 		{
@@ -156,11 +156,11 @@ Redirection::Package Redirection::GetBasePackage(uint32_t freeSpace) const
 	return package;
 }
 
-std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, const Instruction& instruction)
+std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, std::shared_ptr<Instruction> instruction)
 {
 	if (!base)
 	{
-		return std::make_shared<Instruction>(instruction);
+		return instruction;
 	}
 
 	_ASSERT(base->GetPackageType() == PackageType::Redirection);
@@ -197,7 +197,7 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 	return redirect;
 }
 
-std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, const Instruction& instruction, const std::vector<Entry>& chain)
+std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, std::shared_ptr<Instruction> instruction, const std::vector<Entry>& chain)
 {
 	std::vector<Entry> copy = std::vector<Entry>(chain);
 
@@ -293,7 +293,69 @@ std::shared_ptr<Redirection> Redirection::Convert(std::shared_ptr<ByteEntry> bas
 	return redirect;
 }
 
-std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, const Instruction& instruction, const Entry* chain, uint8_t length)
+std::shared_ptr<ByteEntry> Redirection::ChainForPrefix(std::shared_ptr<ByteEntry> base, Prefix prefix)
+{
+	if (!base)
+	{
+		return nullptr;
+	}
+
+	_ASSERT(prefix < Prefix::Default);
+
+	if (base->GetPackageType() == PackageType::Instruction)
+	{
+		for (uint8_t entry : std::reinterpret_pointer_cast<Instruction>(base)->GetCompatiblePrefixes())
+		{
+			if (entry == static_cast<uint8_t>(prefix))
+			{
+				return base;
+			}
+		}
+
+		return nullptr;
+	}
+
+	_ASSERT(base->GetPackageType() == PackageType::Redirection);
+
+	std::shared_ptr<Redirection> redirect = std::reinterpret_pointer_cast<Redirection>(base);
+
+	_ASSERT(redirect->m_Type != Type::X0F383A && redirect->m_Type != Type::Prefix);
+
+	if (redirect->m_Type == Type::None)
+	{
+		return ChainForPrefix(redirect->m_Redirects[0], prefix);
+	}
+
+	bool isInserted = false;
+
+	std::shared_ptr<Redirection> result = std::make_shared<Redirection>(redirect->m_Type);
+	if (redirect->m_Type == Type::Mod)
+	{
+		for (uint8_t i = 0; i < 4; i++)
+		{
+			result->m_Redirects[i] = ChainForPrefix(redirect->m_Redirects[i], prefix);
+			if (result->m_Redirects[i])
+			{
+				isInserted = true;
+			}
+		}
+	}
+	else
+	{
+		for (uint8_t i = 0; i < ARRAY_SIZE(redirect->m_Redirects); i++)
+		{
+			result->m_Redirects[i] = ChainForPrefix(redirect->m_Redirects[i], prefix);
+			if (result->m_Redirects[i])
+			{
+				isInserted = true;
+			}
+		}
+	}
+
+	return isInserted ? result : nullptr;
+}
+
+std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, std::shared_ptr<Instruction> instruction, const Entry* chain, uint8_t length)
 {
 	if (length == 0)
 	{
@@ -324,6 +386,16 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 			{
 				if (redirect->m_Type == Type::Prefix)
 				{
+					for (uint8_t entry : std::reinterpret_pointer_cast<Instruction>(base)->GetCompatiblePrefixes())
+					{
+						if (!redirect->m_Redirects[entry])
+						{
+							continue;
+						}
+
+						redirect->m_Redirects[entry] = Insert(redirect->m_Redirects[entry], instruction, chain, length);
+					}
+
 					redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)] = Insert(redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)], instruction, chain, length);
 					return redirect;
 				}
@@ -366,6 +438,20 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 
 	if (next == 0)
 	{
+		if (redirect->m_Type == Type::Prefix)
+		{
+			for (uint8_t i = 0; i < length; i++)
+			{
+				const Entry& entry = chain[i];
+				if (!redirect->m_Redirects[entry.m_Index])
+				{
+					continue;
+				}
+
+				redirect->m_Redirects[entry.m_Index] = ChainForPrefix(redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)], entry.m_Prefix);
+			}
+		}
+
 		for (uint8_t i = 0; i < length; i++)
 		{
 			const Entry& entry = chain[i];
@@ -375,6 +461,20 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 	}
 	else
 	{
+		if (redirect->m_Type == Type::Prefix)
+		{
+			for (uint8_t i = 0; i < next; i++)
+			{
+				const Entry& entry = chain[i];
+				if (redirect->m_Redirects[entry.m_Index])
+				{
+					continue;
+				}
+
+				redirect->m_Redirects[entry.m_Index] = ChainForPrefix(redirect->m_Redirects[static_cast<uint8_t>(Prefix::Default)], entry.m_Prefix);
+			}
+		}
+
 		for (uint8_t i = 0; i < next; i++)
 		{
 			const Entry& entry = chain[i];
@@ -386,7 +486,7 @@ std::shared_ptr<ByteEntry> Redirection::Insert(std::shared_ptr<ByteEntry> base, 
 	return redirect;
 }
 
-void Redirection::Sort(std::vector<Entry>& chain) // redirection chain -> pfx, mod, reg, mem
+void Redirection::Sort(std::vector<Entry>& chain)
 {
 	for (uint8_t i = 1; i < chain.size(); i++)
 	{

@@ -22,6 +22,9 @@ public:
 	PackageType GetPackageType() const override;
 	class BytePackage GetPackage(uint32_t freeSpace) const override;
 
+public:
+	std::vector<uint8_t> GetCompatiblePrefixes();
+
 private:
 	Package GetBasePackage() const;
 

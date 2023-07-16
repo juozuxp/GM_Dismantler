@@ -29,11 +29,11 @@ public:
 
 	enum class Prefix : uint8_t
 	{
-		RexW,
 		Wait,
 		Repe,
 		Repne,
 		x66,
+		RexW,
 		Default,
 		ArrayMAX
 	};
@@ -107,11 +107,11 @@ public:
 				uint32_t m_Value;
 				struct
 				{
-					uint32_t m_ValidRexW : 1;
 					uint32_t m_ValidWait : 1;
 					uint32_t m_ValidRepe : 1;
 					uint32_t m_ValidRepne : 1;
 					uint32_t m_Valid66 : 1;
+					uint32_t m_ValidRexW : 1;
 					uint32_t m_ValidDefault : 1;
 					uint32_t m_ValidUnused : 2;
 
@@ -162,14 +162,15 @@ public:
 	class BytePackage GetPackage(uint32_t freeSpace) const override;
 
 public:
-	static std::shared_ptr<ByteEntry> Insert(std::shared_ptr<ByteEntry> base, const Instruction& instruction);
-	static std::shared_ptr<ByteEntry> Insert(std::shared_ptr<ByteEntry> base, const Instruction& instruction, const std::vector<Entry>& chain);
+	static std::shared_ptr<ByteEntry> Insert(std::shared_ptr<ByteEntry> base, std::shared_ptr<Instruction> instruction);
+	static std::shared_ptr<ByteEntry> Insert(std::shared_ptr<ByteEntry> base, std::shared_ptr<Instruction> instruction, const std::vector<Entry>& chain);
 
 private:
 	static void Sort(std::vector<Entry>& chain);
 
 	static std::shared_ptr<Redirection> Convert(std::shared_ptr<ByteEntry> base, Type type);
-	static std::shared_ptr<ByteEntry> Insert(std::shared_ptr<ByteEntry> base, const Instruction& instruction, const Entry* chain, uint8_t length);
+	static std::shared_ptr<ByteEntry> ChainForPrefix(std::shared_ptr<ByteEntry> base, Prefix prefix);
+	static std::shared_ptr<ByteEntry> Insert(std::shared_ptr<ByteEntry> base, std::shared_ptr<Instruction> instruction, const Entry* chain, uint8_t length);
 
 private:
 	Package GetBasePackage(uint32_t freeSpace) const;

@@ -45,4 +45,7 @@ public:
 
 private:
 	Package m_Package = {};
+
+private:
+	friend class Instruction;
 };

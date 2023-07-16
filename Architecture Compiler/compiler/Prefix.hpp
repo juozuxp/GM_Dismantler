@@ -8,11 +8,11 @@ class Prefix : public ByteEntry
 public:
 	enum Type : uint32_t
 	{
-		Type_RexW = 1 << 0,
-		Type_Wait = 1 << 1,
-		Type_Repe = 1 << 2,
-		Type_Repne = 1 << 3,
-		Type_x66 = 1 << 4,
+		Type_Wait = 1 << 0,
+		Type_Repe = 1 << 1,
+		Type_Repne = 1 << 2,
+		Type_x66 = 1 << 3,
+		Type_RexW = 1 << 4,
 
 		Type_Rex = 1 << 5,
 		Type_RexB = 1 << 6,
@@ -37,11 +37,11 @@ public:
 		{
 			struct
 			{
-				uint32_t m_REXW : 1;
 				uint32_t m_WAIT : 1;
 				uint32_t m_REPZ : 1;
 				uint32_t m_REPNZ : 1;
 				uint32_t m_x66 : 1;
+				uint32_t m_REXW : 1;
 
 				uint32_t m_REX : 1;
 				uint32_t m_REXB : 1;

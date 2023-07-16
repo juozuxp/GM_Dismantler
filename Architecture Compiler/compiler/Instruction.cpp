@@ -24,6 +24,46 @@ BytePackage Instruction::GetPackage(uint32_t freeSpace) const
 	return Package(GetBasePackage());
 }
 
+std::vector<uint8_t> Instruction::GetCompatiblePrefixes()
+{
+	std::vector<uint8_t> prefixes;
+
+	bool use66 = false;
+	bool useRexW = false;
+
+	for (const Operand& operand : m_Operands)
+	{
+		if (operand.m_Package.m_Type == Operand::Type::none)
+		{
+			break;
+		}
+
+		if (operand.m_Package.m_Mem.m_Size < DescriptorOperand::Size::base_80)
+		{
+			use66 = use66 || operand.m_Package.m_Mem.m_Override1;
+			useRexW = useRexW || operand.m_Package.m_Mem.m_Override1;
+		}
+
+		if (operand.m_Package.m_Reg.m_Size < DescriptorOperand::Size::base_80)
+		{
+			use66 = use66 || operand.m_Package.m_Reg.m_Override1;
+			useRexW = useRexW || operand.m_Package.m_Reg.m_Override1;
+		}
+	}
+
+	if (use66)
+	{
+		prefixes.push_back(static_cast<uint8_t>(Redirection::Prefix::x66));
+	}
+
+	if (useRexW)
+	{
+		prefixes.push_back(static_cast<uint8_t>(Redirection::Prefix::RexW));
+	}
+
+	return prefixes;
+}
+
 Instruction::Package Instruction::GetBasePackage() const
 {
 	Package package = {};

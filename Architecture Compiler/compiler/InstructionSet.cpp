@@ -120,7 +120,7 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 				redirections.push_back(Redirection::Entry::Entry(Redirection::Type::Mem, GET_MOD_RM(bytes[i + 1])));
 			}
 
-			entry = Redirection::Insert(entry, Instruction(descriptor, m_Types[descriptor.GetName()]), redirections);
+			entry = Redirection::Insert(entry, std::make_shared<Instruction>(descriptor, m_Types[descriptor.GetName()]), redirections);
 			break;
 		}
 
@@ -136,7 +136,7 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 				redirections.push_back(Redirection::Entry::Entry(Redirection::Type::Mem, GET_MOD_RM(bytes[i + 1])));
 			}
 
-			entry = Redirection::Insert(entry, Instruction(descriptor, m_Types[descriptor.GetName()]), redirections);
+			entry = Redirection::Insert(entry, std::make_shared<Instruction>(descriptor, m_Types[descriptor.GetName()]), redirections);
 			break;
 		}
 
