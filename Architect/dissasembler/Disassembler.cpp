@@ -232,6 +232,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			else
 			{
 				resolved.m_Operands[i].m_Type = ILOperandType_Memory;
+				resolved.m_Operands[i].m_Memory.m_Segment = GetSegment(prefixes);
 			}
 
 			if (mem == 4) // rsp (sib)
@@ -256,7 +257,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 						if (sib_index == 4)
 						{
 							resolved.m_Operands[i].m_Type = ILOperandType_MemoryAbsolute;
-							resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(bytes + 2);
+							resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
+							resolved.m_Operands[i].m_MemoryValue.m_Value = *reinterpret_cast<const uint32_t*>(bytes + 2);
 
 							break;
 						}
@@ -299,7 +301,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				disp = 4;
 
 				resolved.m_Operands[i].m_Type = ILOperandType_MemoryRelative;
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const uint32_t*>(bytes + 1);
+				resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
+				resolved.m_Operands[i].m_MemoryValue.m_Value = *reinterpret_cast<const uint32_t*>(bytes + 1);
 				break;
 			}
 			else if (mod == 1)
@@ -370,6 +373,11 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		else if (operand.m_Type == OpType::rel)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
+		}
+		else if (operand.m_Type == OpType::moffs)
+		{
+			resolved.m_Operands[i].m_Type = ILOperandType_MemoryAbsolute;
+			resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
 		}
 		else
 		{
@@ -519,20 +527,3 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 	return resolved;
 }
 
-uint8_t Disassembler::CountToBit(uint32_t value)
-{
-	if (value == 0)
-	{
-		return ~0;
-	}
-
-	for (uint8_t i = 0;; i++, value >>= 1)
-	{
-		if (value & 1)
-		{
-			return i;
-		}
-	}
-
-	return 0;
-}

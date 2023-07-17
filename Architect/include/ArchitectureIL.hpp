@@ -71,8 +71,13 @@ struct ILOperand
 
 			Register m_Type;
 		} m_Register; // ILOperandType_Register
+		struct
+		{
+			uint8_t m_Segment; // segment index, IL_INVALID_REGISTER - reserved for none
+			int64_t m_Value;
+		} m_MemoryValue; // [m_Value] if ILOperandType_MemoryAbsolute specified, [rip + m_Value] if ILOperandType_MemoryRelative specified
 
-		int64_t m_Value; // if ILOperandType_MemoryAbsolute specified, [m_Value], if ILOperandType_MemoryRelative specified, [rip + m_Value], if ILOperandType_ValueRelative rip + m_Value
+		int64_t m_Value; // ILOperandType_Value, rip + m_Value if ILOperandType_ValueRelative
 	};
 };
 #pragma pack(pop)

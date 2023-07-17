@@ -64,7 +64,7 @@ public:
 
 public:
 	Prefix() = default;
-	Prefix(uint16_t prefix);
+	Prefix(uint32_t prefix);
 
 public:
 	bool IsStandAlone();
@@ -81,7 +81,7 @@ private:
 	Package GetBasePackage() const;
 
 private:
-	uint16_t m_Prefix = 0;
+	uint32_t m_Prefix = 0;
 	uint16_t m_Instruction = 0;
 	Redirection::Prefix m_RedirectPrefix = Redirection::Prefix::Default;
 };

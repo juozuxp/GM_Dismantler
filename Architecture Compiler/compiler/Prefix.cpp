@@ -1,7 +1,7 @@
 #include "Prefix.hpp"
 #include "BytePackage.hpp"
 
-Prefix::Prefix(uint16_t prefix) :
+Prefix::Prefix(uint32_t prefix) :
 	m_Prefix(prefix)
 {
 	if (prefix & Type_RexW)

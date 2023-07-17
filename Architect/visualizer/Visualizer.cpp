@@ -35,6 +35,11 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 			{
 			case ILOperandType_Memory:
 			{
+				if (operand.m_Memory.m_Segment != IL_INVALID_REGISTER)
+				{
+					printf("s%u:", operand.m_Memory.m_Segment);
+				}
+
 				printf("[");
 
 				if (operand.m_Memory.m_Base != IL_INVALID_REGISTER)
@@ -127,14 +132,24 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 			} break;
 			case ILOperandType_MemoryRelative:
 			{
-				int32_t convert = static_cast<int32_t>(operand.m_Value);
+				if (operand.m_MemoryValue.m_Segment != IL_INVALID_REGISTER)
+				{
+					printf("s%u:", operand.m_MemoryValue.m_Segment);
+				}
+
+				int32_t convert = static_cast<int32_t>(operand.m_MemoryValue.m_Value);
 				bool sign = convert < 0;
 
 				printf("[rip %c %X]", sign ? '-' : '+', sign ? -convert : convert);
 			} break;
 			case ILOperandType_MemoryAbsolute:
 			{
-				printf("[%llX]", operand.m_Value);
+				if (operand.m_MemoryValue.m_Segment != IL_INVALID_REGISTER)
+				{
+					printf("s%u:", operand.m_MemoryValue.m_Segment);
+				}
+
+				printf("[%llX]", operand.m_MemoryValue.m_Value);
 			} break;
 			}
 		}
