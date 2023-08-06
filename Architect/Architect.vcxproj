@@ -135,13 +135,27 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="assembler\AsmRedirectRegister.hpp" />
+    <ClInclude Include="assembler\AsmRedirectType.hpp" />
+    <ClInclude Include="assembler\AsmRedirectSize.hpp" />
+    <ClInclude Include="assembler\AsmRedirect.hpp" />
+    <ClInclude Include="assembler\AsmInstruction.hpp" />
+    <ClInclude Include="include\AsmIndex.hpp" />
+    <ClInclude Include="include\Assembler.hpp" />
     <ClInclude Include="include\ArchitectureIL.hpp" />
-    <ClInclude Include="include\ArraySize.hpp" />
+    <ClInclude Include="include\Utility.hpp" />
     <ClInclude Include="include\x86_x64.hpp" />
     <ClInclude Include="include\Disassembler.hpp" />
     <ClInclude Include="include\Visualizer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="assembler\AsmRedirectRegister.cpp" />
+    <ClCompile Include="assembler\AsmRedirectType.cpp" />
+    <ClCompile Include="assembler\AsmRedirectSize.cpp" />
+    <ClCompile Include="assembler\AsmRedirect.cpp" />
+    <ClCompile Include="assembler\AsmInstruction.cpp" />
+    <ClCompile Include="assembler\AsmIndex.cpp" />
+    <ClCompile Include="assembler\Assembler.cpp" />
     <ClCompile Include="dissasembler\Disassembler.cpp" />
     <ClCompile Include="visualizer\Visualizer.cpp" />
   </ItemGroup>

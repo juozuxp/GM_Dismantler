@@ -676,6 +676,7 @@ enum InsType : uint16_t
 	InsType_xsetbv,
 	InsType_xsusldtrk,
 	InsType_xtest,
+	InsType_ARRAY_MAX
 };
 
 enum class Register : uint8_t
@@ -769,7 +770,7 @@ enum PfxType : uint32_t
 	Prefix_DS = 1 << 13,
 	Prefix_ES = 1 << 14,
 	Prefix_GS = 1 << 15,
-	Prefix_FS = 1 << 16
+	Prefix_FS = 1 << 16,
 };
 
 #pragma pack(push, 1)
@@ -805,6 +806,12 @@ struct Prefix
 };
 #pragma pack(pop)
 
+#define REDIRECT_REG_SIZE 8
+#define REDIRECT_MEM_SIZE 8
+#define REDIRECT_MOD_SIZE 4
+#define REDIRECT_PREFIX_SIZE 6
+#define REDIRECT_X0F383A_SIZE 3
+
 enum class ReType : uint8_t
 {
 	None,
@@ -829,6 +836,7 @@ struct Redirect
 	uint32_t m_BaseIndex;
 	union
 	{
+		uint32_t m_Mask;
 		union
 		{
 			uint32_t m_Value;

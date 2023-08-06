@@ -2,6 +2,7 @@
 #include <Visualizer.hpp>
 #include <Windows.h>
 #include <string_view>
+#include <Assembler.hpp>
 
 
 const IMAGE_SECTION_HEADER* GetSection(HMODULE module, const std::string_view& name)
@@ -24,20 +25,21 @@ const IMAGE_SECTION_HEADER* GetSection(HMODULE module, const std::string_view& n
 
 int main()
 {
-
-	uint8_t code[] = { 0x0F, 0x01, 0xC1 };
+	uint8_t code[] = { 0x48, 0x0f, 0xc7, 0xf8 };
 
 	Disassembler instance;
 	Visualizer visualizer;
+	Assembler assembler;
 
 
-	HMODULE module = LoadLibraryA("d3d11.dll");
-	const IMAGE_SECTION_HEADER* section = GetSection(module, ".text");
 
-	std::vector<ILInstruction> instructions = instance.Disassemble(reinterpret_cast<const uint8_t*>(module) + section->VirtualAddress, section->Misc.VirtualSize);
+	/*HMODULE module = LoadLibraryA("d3d11.dll");
+	const IMAGE_SECTION_HEADER* section = GetSection(module, ".text");*/
+
+	std::vector<ILInstruction> instructions = instance.Disassemble(code, sizeof(code));
 
 
-	printf("%p\n", module);
+	/*printf("%p\n", module);
 
 	uint64_t index = 0;
 	uint64_t cursor = reinterpret_cast<uint64_t>(module) + section->VirtualAddress;
@@ -50,9 +52,9 @@ int main()
 
 		index++;
 		cursor += instruction.m_Size;
-	}
+	}*/
 
-	// visualizer.PrintToConsole(instructions);
+	visualizer.PrintToConsole(instructions);
 
 	system("pause");
 }

@@ -1,5 +1,5 @@
 #include "Visualizer.hpp"
-#include "ArraySize.hpp"
+#include "Utility.hpp"
 
 void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 {

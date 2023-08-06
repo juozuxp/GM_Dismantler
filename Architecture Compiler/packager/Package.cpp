@@ -30,7 +30,7 @@ std::string Package::GetEnumTypes() const
 		enumerator += ",\n";
 	}
 
-	return enumerator + "};";
+	return enumerator + "\tInsType_ARRAY_MAX\n};";
 }
 
 std::string Package::GetCoreStructures() const
@@ -137,7 +137,7 @@ std::string Package::GetCoreStructures() const
 		"	Prefix_DS = 1 << 13,\n"
 		"	Prefix_ES = 1 << 14,\n"
 		"	Prefix_GS = 1 << 15,\n"
-		"	Prefix_FS = 1 << 16\n"
+		"	Prefix_FS = 1 << 16,\n"
 		"};\n"
 		"\n"
 		"#pragma pack(push, 1)\n"
@@ -176,6 +176,12 @@ std::string Package::GetCoreStructures() const
 
 	std::string CoreRedirect =
 	{
+		"#define REDIRECT_REG_SIZE 8\n"
+		"#define REDIRECT_MEM_SIZE 8\n"
+		"#define REDIRECT_MOD_SIZE 4\n"
+		"#define REDIRECT_PREFIX_SIZE 6\n"
+		"#define REDIRECT_X0F383A_SIZE 3\n"
+		"\n"
 		"enum class ReType : uint8_t\n"
 		"{\n"
 		"	None,\n"
@@ -200,6 +206,7 @@ std::string Package::GetCoreStructures() const
 		"	uint32_t m_BaseIndex;\n"
 		"	union\n"
 		"	{\n"
+		"		uint32_t m_Mask;\n"
 		"		union\n"
 		"		{\n"
 		"			uint32_t m_Value;\n"

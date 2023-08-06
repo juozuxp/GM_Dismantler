@@ -1,5 +1,5 @@
 #include "Disassembler.hpp"
-#include "ArraySize.hpp"
+#include "Utility.hpp"
 
 std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t size)
 {
@@ -90,8 +90,8 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 			if (redirect.m_Type == ReType::Prefix)
 			{
-				uint32_t value = redirect.m_Prefix.m_Value & ((Prefix_x66 << 1) - 1);
-				uint8_t count = CountToBit(prefixes.m_Prefix & value);
+				uint32_t value = redirect.m_Prefix.m_Value & ((Prefix_RexW << 1) - 1);
+				uint8_t count = Utility::CountToBit(prefixes.m_Prefix & value);
 
 				if (count == static_cast<uint8_t>(~0))
 				{
