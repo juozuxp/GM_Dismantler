@@ -105,7 +105,7 @@ std::string Package::GetCoreStructures() const
 		"	{\n"
 		"		uint8_t m_Rex : 1;\n"
 		"		uint8_t m_Constant : 1;\n"
-		"		uint8_t m_RegisterIndex : 4;\n"
+		"		uint8_t m_Value : 4;\n"
 		"	};\n"
 		"	\n"
 		"	OperandSize m_Reg;\n"

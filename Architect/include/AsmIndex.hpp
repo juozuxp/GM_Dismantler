@@ -39,10 +39,10 @@ public:
 		{
 			uint8_t m_Rex : 1 = 0;
 			uint8_t m_Constant : 1 = 0;
-			uint8_t m_RegisterIndex : 4 = 0;
+			uint8_t m_Value : 4 = 0;
 		};
 
-		OperandSize m_Size[static_cast<uint8_t>(IndexOpSize::ARRAY_MAX)];
+		OperandSize m_Size[static_cast<uint8_t>(IndexOpSize::ARRAY_MAX)] = {};
 	};
 
 	struct Index

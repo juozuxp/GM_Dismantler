@@ -329,12 +329,12 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 				if (operand.m_Rex)
 				{
-					resolved.m_Operands[i].m_Register.m_Base = operand.m_RegisterIndex + reg_extend;
-					resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && operand.m_RegisterIndex >= 4;
+					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value + reg_extend;
+					resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && operand.m_Value >= 4;
 				}
 				else
 				{
-					resolved.m_Operands[i].m_Register.m_Base = operand.m_RegisterIndex;
+					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value;
 				}
 
 				break;
@@ -386,7 +386,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 		if (operand.m_Constant)
 		{
-			resolved.m_Operands[i].m_Value = operand.m_RegisterIndex;
+			resolved.m_Operands[i].m_Value = operand.m_Value;
 			continue;
 		}
 

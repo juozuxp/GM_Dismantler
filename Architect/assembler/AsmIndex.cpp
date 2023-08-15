@@ -278,19 +278,19 @@ std::shared_ptr<AsmIndex> AsmIndex::MapOperandConstant(const std::vector<Index>&
 			{
 				differ = true;
 			}
-			else if (index.m_Operands[i].m_RegisterIndex != reference.m_Operands[i].m_RegisterIndex)
+			else if (index.m_Operands[i].m_Value != reference.m_Operands[i].m_Value)
 			{
 				differ = true;
 			}
 
 			if (index.m_Operands[i].m_Constant)
 			{
-				indexMap[index.m_Operands[i].m_RegisterIndex].push_back(index);
+				indexMap[index.m_Operands[i].m_Value].push_back(index);
 
 				if (index.m_Operands[i].m_Type == IndexOpType::reg &&
 					index.m_Operands[i].m_Rex)
 				{
-					indexMap[index.m_Operands[i].m_RegisterIndex + 8].push_back(index);
+					indexMap[index.m_Operands[i].m_Value + 8].push_back(index);
 				}
 			}
 			else
@@ -379,7 +379,7 @@ AsmIndex::IndexOperand::IndexOperand(const Operand& operand)
 
 	m_Rex = operand.m_Rex;
 	m_Constant = operand.m_Constant;
-	m_RegisterIndex = operand.m_RegisterIndex;
+	m_Value = operand.m_Value;
 
 	m_Size[static_cast<uint8_t>(IndexOpSize::reg)] = operand.m_Reg;
 	m_Size[static_cast<uint8_t>(IndexOpSize::mem)] = operand.m_Mem;

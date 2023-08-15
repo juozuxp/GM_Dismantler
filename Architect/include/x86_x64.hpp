@@ -741,7 +741,7 @@ struct Operand
 	{
 		uint8_t m_Rex : 1;
 		uint8_t m_Constant : 1;
-		uint8_t m_RegisterIndex : 4;
+		uint8_t m_Value : 4;
 	};
 	
 	OperandSize m_Reg;
