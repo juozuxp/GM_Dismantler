@@ -4,5 +4,14 @@
 class AsmInstruction : public AsmIndex
 {
 public:
-	std::shared_ptr<AsmIndex> GetEntry(const ILInstruction& instruction) override final;
+	AsmInstruction(const Index& index);
+
+public:
+	const Index& GetTemplate() const;
+
+public:
+	std::shared_ptr<const AsmIndex> GetEntry(const ILInstruction& instruction) const override final;
+
+private:
+	Index m_Template;
 };

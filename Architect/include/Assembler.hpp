@@ -5,8 +5,6 @@
 
 class Assembler
 {
-public:
-
 private:
 	struct Level
 	{
@@ -22,21 +20,26 @@ private:
 		Instruction() = default;
 		Instruction(const Package* package);
 
-		std::vector<Level> m_Chain; // redirect chain
+		uint8_t m_Byte = 0;
 		const Package* m_Package = nullptr;
+		std::vector<Level> m_Chain; // redirect chain
 	};
 
 public:
 	Assembler();
 
+public:
+	std::vector<uint8_t> Assemble(const ILInstruction& instruction) const;
+
 private:
 	std::vector<AsmIndex::Index> FlattenInstructions(const Package* base, const Package* package, std::vector<uint8_t>& baseBytes);
 
 private:
-	std::vector<AsmIndex::Index> IndexInstructions(const std::vector<Instruction>& instructions, const std::vector<uint8_t>& baseBytes);
-
 	void FlattenChain(std::vector<Instruction>& instructions, const Package* base, const Package* package);
 
+	std::vector<AsmIndex::Index> IndexInstructions(const std::vector<Instruction>& instructions, const std::vector<uint8_t>& baseBytes);
+
 private:
+	static bool s_ReverseTableValid;
 	static std::shared_ptr<AsmIndex> s_ReverseTable[InsType_ARRAY_MAX];
 };

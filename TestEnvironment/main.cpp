@@ -25,7 +25,7 @@ const IMAGE_SECTION_HEADER* GetSection(HMODULE module, const std::string_view& n
 
 int main()
 {
-	uint8_t code[] = { 0x48, 0x0f, 0xc7, 0xf8 };
+	uint8_t code[] = { 0x48, 0x05, 0x00, 0x00, 0x00, 0x00 };
 
 	Disassembler instance;
 	Visualizer visualizer;
@@ -53,6 +53,8 @@ int main()
 		index++;
 		cursor += instruction.m_Size;
 	}*/
+
+	assembler.Assemble(instructions[0]);
 
 	visualizer.PrintToConsole(instructions);
 

@@ -716,12 +716,17 @@ enum class OpType : uint8_t
 };
 
 #pragma pack(push, 1)
-struct OperandSize
+union OperandSize
 {
-	OpSize m_Size : 6;
+	struct
+	{
+		OpSize m_Size : 6;
 	
-	uint8_t m_Override1 : 1; // x66 or ymm override
-	uint8_t m_Override2 : 1; // x48 (rexw) or zmm override
+		uint8_t m_Override1 : 1; // x66 or ymm override
+		uint8_t m_Override2 : 1; // x48 (rexw) or zmm override
+	};
+
+	uint8_t m_Value;
 };
 
 struct Operand

@@ -1,7 +1,17 @@
 #include "AsmInstruction.hpp"
 #include <assert.h>
 
-std::shared_ptr<AsmIndex> AsmInstruction::GetEntry(const ILInstruction& instruction)
+AsmInstruction::AsmInstruction(const Index& index) :
+	m_Template(index)
 {
-	return std::shared_ptr<AsmIndex>();
+}
+
+const AsmIndex::Index& AsmInstruction::GetTemplate() const
+{
+	return m_Template;
+}
+
+std::shared_ptr<const AsmIndex> AsmInstruction::GetEntry(const ILInstruction& instruction) const
+{
+	return shared_from_this();
 }

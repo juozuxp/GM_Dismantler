@@ -135,6 +135,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="assembler\AsmRedirectConstant.hpp" />
     <ClInclude Include="assembler\AsmRedirectRegister.hpp" />
     <ClInclude Include="assembler\AsmRedirectType.hpp" />
     <ClInclude Include="assembler\AsmRedirectSize.hpp" />
@@ -149,6 +150,7 @@
     <ClInclude Include="include\Visualizer.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="assembler\AsmRedirectConstant.cpp" />
     <ClCompile Include="assembler\AsmRedirectRegister.cpp" />
     <ClCompile Include="assembler\AsmRedirectType.cpp" />
     <ClCompile Include="assembler\AsmRedirectSize.cpp" />

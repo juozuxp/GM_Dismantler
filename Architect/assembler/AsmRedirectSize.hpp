@@ -4,27 +4,17 @@
 class AsmRedirectSize : public AsmRedirect
 {
 public:
-	AsmRedirectSize(const Operand& operand, uint8_t operandIndex);
+	AsmRedirectSize(uint8_t operand);
+
+public:
+	void Set(OpSize size, std::shared_ptr<AsmIndex> entry);
+
+public:
+	std::shared_ptr<const AsmIndex> GetEntry(const ILInstruction& instruction) const override final;
 
 private:
-	union
-	{
-		struct
-		{
-			uint16_t m_Undefined : 1;
-			uint16_t m_Size8 : 1;
-			uint16_t m_Size16 : 1;
-			uint16_t m_Size32 : 1;
-			uint16_t m_Size64 : 1;
-			uint16_t m_Size80 : 1;
-			uint16_t m_Size128 : 1;
-			uint16_t m_Size256 : 1;
-			uint16_t m_Size512 : 1;
-		};
+	std::shared_ptr<AsmIndex> m_Entries[10]; // indexed from OpSize
 
-		uint16_t m_Value;
-	} m_Valid;
-
-	std::shared_ptr<AsmIndex> m_Table[9]; // for each valid entry
+private:
+	static constexpr OpSize c_ILToOpSizeMap[] = { OpSize::undefined, OpSize::base_8, OpSize::base_16, OpSize::base_32, OpSize::base_64, OpSize::base_80, OpSize::base_128, OpSize::base_256, OpSize::base_512 };
 };
-

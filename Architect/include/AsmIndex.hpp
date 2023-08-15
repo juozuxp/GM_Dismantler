@@ -1,5 +1,6 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include "ArchitectureIL.hpp"
 
 class AsmIndex : public std::enable_shared_from_this<AsmIndex>
@@ -14,6 +15,13 @@ public:
 		imm,
 		rel,
 		moffs
+	};
+
+	enum class IndexOpSize
+	{
+		reg,
+		mem,
+		ARRAY_MAX
 	};
 
 	struct IndexOperand
@@ -34,8 +42,7 @@ public:
 			uint8_t m_RegisterIndex : 4 = 0;
 		};
 
-		OperandSize m_Reg = {};
-		OperandSize m_Mem = {};
+		OperandSize m_Size[static_cast<uint8_t>(IndexOpSize::ARRAY_MAX)];
 	};
 
 	struct Index
@@ -43,20 +50,46 @@ public:
 		Index() = default;
 		Index(const Package& package);
 
+		bool operator==(const Index& lhs);
+		bool operator!=(const Index& lhs);
+
+
 		InsType m_Type = InsType_invalid;
 
-		uint8_t m_Prefix = 0;
-		uint8_t m_Bytes[4] = {};
+		union
+		{
+			struct
+			{
+				uint8_t m_Prefix;
+				uint8_t m_Base;
+				uint8_t m_X0F383A;
+				uint8_t m_Instruction;
+				uint8_t m_ModRM;
 
-		uint8_t n_HasUpper : 1 = false;
-		uint8_t m_HasPrefix : 1 = false;
+				uint8_t m_HasPrefix : 1;
+				uint8_t m_HasBase : 1;
+				uint8_t m_HasX0F383A : 1;
+				uint8_t m_HasModRM : 1;
+				uint8_t m_OnlyReg : 1;
+			};
 
-		uint8_t m_ByteCount : 3 = 0;
-		uint8_t m_UpperOperand : 3 = 0;
+			uint64_t m_Comparer = 0;
+		};
 
 		IndexOperand m_Operands[4] = {};
 	};
 
 public:
-	virtual std::shared_ptr<AsmIndex> GetEntry(const ILInstruction& instruction) = 0;
+	static std::shared_ptr<AsmIndex> MapTree(const std::vector<Index>& indexes);
+
+private:
+	static std::vector<Index> DeSynonymise(const std::vector<Index>& indexes);
+
+	static std::shared_ptr<AsmIndex> MapOperandType(const std::vector<Index>& indexes, uint8_t first);
+	static std::shared_ptr<AsmIndex> MapOperandSize(const std::vector<Index>& indexes, uint8_t first);
+	static std::shared_ptr<AsmIndex> MapOperandConstant(const std::vector<Index>& indexes, uint8_t first);
+	static std::shared_ptr<AsmIndex> MapOperandRegister(const std::vector<Index>& indexes, uint8_t first);
+
+public:
+	virtual std::shared_ptr<const AsmIndex> GetEntry(const ILInstruction& instruction) const = 0;
 };

@@ -3,6 +3,9 @@
 #include <unordered_map>
 #include "AsmIndex.hpp"
 
+bool Assembler::s_ReverseTableValid = false;
+std::shared_ptr<AsmIndex> Assembler::s_ReverseTable[InsType_ARRAY_MAX];
+
 Assembler::Instruction::Instruction(const Package* package) :
 	m_Package(package)
 {
@@ -10,8 +13,35 @@ Assembler::Instruction::Instruction(const Package* package) :
 
 Assembler::Assembler()
 {
-	std::vector<uint8_t> base = std::vector<uint8_t>();
-	std::vector<AsmIndex::Index> indexes = FlattenInstructions(reinterpret_cast<const Package*>(CompiledPackage), reinterpret_cast<const Package*>(CompiledPackage), base);
+	if (!s_ReverseTableValid)
+	{
+		std::vector<AsmIndex::Index> types[InsType_ARRAY_MAX];
+
+		std::vector<uint8_t> base = std::vector<uint8_t>();
+		std::vector<AsmIndex::Index> indexes = FlattenInstructions(reinterpret_cast<const Package*>(CompiledPackage), reinterpret_cast<const Package*>(CompiledPackage), base);
+
+		for (const AsmIndex::Index& index : indexes)
+		{
+			types[index.m_Type].push_back(index);
+		}
+
+		for (uint32_t i = 0; i < ARRAY_SIZE(types); i++)
+		{
+			s_ReverseTable[i] = AsmIndex::MapTree(types[i]);
+		}
+	}
+}
+
+std::vector<uint8_t> Assembler::Assemble(const ILInstruction& instruction) const
+{
+	std::shared_ptr<const AsmIndex> index = s_ReverseTable[instruction.m_Type]->GetEntry(instruction);
+
+	if (!index)
+	{
+		return std::vector<uint8_t>();
+	}
+
+	return std::vector<uint8_t>();
 }
 
 Assembler::Level::Level(ReType type, uint32_t index) :
@@ -41,7 +71,14 @@ std::vector<AsmIndex::Index> Assembler::FlattenInstructions(const Package* base,
 			indexes.insert(indexes.end(), result.begin(), result.end());
 		}
 
+		uint32_t cursor = instructions.size();
+
 		FlattenChain(instructions, base, package);
+
+		for (uint32_t j = cursor; j < instructions.size(); j++)
+		{
+			instructions[j].m_Byte = i;
+		}
 	}
 
 	std::vector<AsmIndex::Index> result = IndexInstructions(instructions, baseBytes);
@@ -68,10 +105,12 @@ std::vector<AsmIndex::Index> Assembler::IndexInstructions(const std::vector<Inst
 		const Instruction& reference = index.second[0];
 
 		AsmIndex::Index indexed = AsmIndex::Index(*reference.m_Package);
-
-		for (uint8_t byte : baseBytes)
+		
+		indexed.m_Instruction = reference.m_Byte;
+		if (baseBytes.size() != 0)
 		{
-			indexed.m_Bytes[indexed.m_ByteCount++] = byte;
+			indexed.m_HasBase = true;
+			indexed.m_Base = baseBytes[0];
 		}
 
 		uint8_t mod = ~0;
@@ -87,7 +126,6 @@ std::vector<AsmIndex::Index> Assembler::IndexInstructions(const std::vector<Inst
 				constexpr uint8_t indexToByte[] = { 0x9B, 0xF3, 0xF2, 0x66, 0x48 };
 
 				bool hasDefault = false;
-
 				for (const Instruction& instruction : index.second)
 				{
 					if (instruction.m_Chain[i].m_Index == REDIRECT_PREFIX_SIZE - 1)
@@ -223,6 +261,16 @@ std::vector<AsmIndex::Index> Assembler::IndexInstructions(const std::vector<Inst
 					}
 				}
 			} break;
+			case ReType::X0F383A:
+			{
+				uint8_t bytes[] = { 0x38, 0x3A };
+
+				if (reference.m_Chain[i].m_Index != X0F383A_None)
+				{
+					indexed.m_HasX0F383A = true;
+					indexed.m_X0F383A = bytes[reference.m_Chain[i].m_Index - 1];
+				}
+			} break;
 			}
 		}
 
@@ -230,14 +278,15 @@ std::vector<AsmIndex::Index> Assembler::IndexInstructions(const std::vector<Inst
 			reg != static_cast<uint8_t>(~0) &&
 			mem != static_cast<uint8_t>(~0))
 		{
-			indexed.m_Bytes[indexed.m_ByteCount++] = (mod << 6) | ((reg << 3) & ((1 << 3) - 1)) | (mem & ((1 << 3) - 1));
+			indexed.m_HasModRM = true;
+			indexed.m_ModRM = (mod << 6) | ((reg << 3) & ((1 << 3) - 1)) | (mem & ((1 << 3) - 1));
 		}
 		else
 		{
 			if (reg != static_cast<uint8_t>(~0))
 			{
-				indexed.n_HasUpper = true;
-				indexed.m_UpperOperand = reg;
+				indexed.m_ModRM = reg;
+				indexed.m_OnlyReg = true;
 			}
 		}
 
