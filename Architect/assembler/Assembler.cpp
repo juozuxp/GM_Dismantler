@@ -15,7 +15,7 @@ Assembler::Assembler()
 {
 	if (!s_ReverseTableValid)
 	{
-		std::vector<AsmIndex::Index> types[InsType_ARRAY_MAX];
+		std::vector<AsmIndex::Index>* types = new std::vector<AsmIndex::Index>[InsType_ARRAY_MAX]; // warning thrown otherwise, this many vectors on the stack is a no go
 
 		std::vector<uint8_t> base = std::vector<uint8_t>();
 		std::vector<AsmIndex::Index> indexes = FlattenInstructions(reinterpret_cast<const Package*>(CompiledPackage), reinterpret_cast<const Package*>(CompiledPackage), base);
@@ -25,16 +25,26 @@ Assembler::Assembler()
 			types[index.m_Type].push_back(index);
 		}
 
-		for (uint32_t i = 0; i < ARRAY_SIZE(types); i++)
+		for (uint32_t i = 0; i < InsType_ARRAY_MAX; i++)
 		{
 			s_ReverseTable[i] = AsmIndex::MapTree(types[i]);
 		}
+
+		delete[] types;
 	}
 }
 
-std::vector<uint8_t> Assembler::Assemble(const ILInstruction& instruction) const
+std::vector<uint8_t> Assembler::Assemble(const std::vector<ILInstruction>& instructions) const
 {
-	return s_ReverseTable[instruction.m_Type]->Assemble(instruction);
+	std::vector<uint8_t> bytes;
+
+	for (const ILInstruction& instruction : instructions)
+	{
+		std::vector<uint8_t> assembled = s_ReverseTable[instruction.m_Type]->Assemble(instruction);
+		bytes.insert(bytes.end(), assembled.begin(), assembled.end());
+	}
+
+	return bytes;
 }
 
 Assembler::Level::Level(ReType type, uint32_t index) :

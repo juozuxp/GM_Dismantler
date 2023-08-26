@@ -29,7 +29,7 @@ public:
 	Assembler();
 
 public:
-	std::vector<uint8_t> Assemble(const ILInstruction& instruction) const;
+	std::vector<uint8_t> Assemble(const std::vector<ILInstruction>& instructions) const;
 
 private:
 	std::vector<AsmIndex::Index> FlattenInstructions(const Package* base, const Package* package, std::vector<uint8_t>& baseBytes);
