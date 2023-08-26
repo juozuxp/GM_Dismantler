@@ -21,7 +21,7 @@ public:
 	void Set(IndexOpType type, std::shared_ptr<AsmIndex> entry);
 
 public:
-	std::shared_ptr<const AsmIndex> GetEntry(const ILInstruction& instruction) const override final;
+	std::vector<uint8_t> Assemble(const ILInstruction& instruction) const override final;
 
 private:
 	std::shared_ptr<AsmIndex> m_Entries[6] = {};

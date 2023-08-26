@@ -18,7 +18,7 @@ void AsmRedirectConstant::Set(uint8_t value, std::shared_ptr<AsmIndex> index)
 	}
 }
 
-std::shared_ptr<const AsmIndex> AsmRedirectConstant::GetEntry(const ILInstruction& instruction) const
+std::vector<uint8_t> AsmRedirectConstant::Assemble(const ILInstruction& instruction) const
 {
 	const ILOperand& operand = instruction.m_Operands[m_Operand];
 
@@ -27,7 +27,7 @@ std::shared_ptr<const AsmIndex> AsmRedirectConstant::GetEntry(const ILInstructio
 		if ((operand.m_Register.m_Base + 1) < ARRAY_SIZE(m_Entries) &&
 			m_Entries[operand.m_Register.m_Base + 1])
 		{
-			return m_Entries[operand.m_Register.m_Base + 1]->GetEntry(instruction);
+			return m_Entries[operand.m_Register.m_Base + 1]->Assemble(instruction);
 		}
 	}
 
@@ -36,14 +36,14 @@ std::shared_ptr<const AsmIndex> AsmRedirectConstant::GetEntry(const ILInstructio
 		if ((operand.m_Value + 1) < ARRAY_SIZE(m_Entries) &&
 			m_Entries[operand.m_Value + 1])
 		{
-			return m_Entries[operand.m_Value + 1]->GetEntry(instruction);
+			return m_Entries[operand.m_Value + 1]->Assemble(instruction);
 		}
 	}
 
 	if (!m_Entries[0])
 	{
-		return std::shared_ptr<AsmIndex>();
+		return std::vector<uint8_t>();
 	}
 
-	return m_Entries[0]->GetEntry(instruction);
+	return m_Entries[0]->Assemble(instruction);
 }

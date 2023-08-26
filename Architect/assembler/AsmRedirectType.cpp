@@ -5,7 +5,7 @@ AsmRedirectType::AsmRedirectType(uint8_t operand) :
 {
 }
 
-std::shared_ptr<const AsmIndex> AsmRedirectType::GetEntry(const ILInstruction& instruction) const
+std::vector<uint8_t> AsmRedirectType::Assemble(const ILInstruction& instruction) const
 {
 	const ILOperand& operand = instruction.m_Operands[m_Operand];
 
@@ -18,10 +18,10 @@ std::shared_ptr<const AsmIndex> AsmRedirectType::GetEntry(const ILInstruction& i
 
 	if (!m_Entries[index])
 	{
-		return std::shared_ptr<AsmIndex>();
+		return std::vector<uint8_t>();
 	}
 
-	return m_Entries[index]->GetEntry(instruction);
+	return m_Entries[index]->Assemble(instruction);
 }
 
 void AsmRedirectType::Set(IndexOpType type, std::shared_ptr<AsmIndex> entry)

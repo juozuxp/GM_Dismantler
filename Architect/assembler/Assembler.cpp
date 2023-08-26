@@ -34,14 +34,7 @@ Assembler::Assembler()
 
 std::vector<uint8_t> Assembler::Assemble(const ILInstruction& instruction) const
 {
-	std::shared_ptr<const AsmIndex> index = s_ReverseTable[instruction.m_Type]->GetEntry(instruction);
-
-	if (!index)
-	{
-		return std::vector<uint8_t>();
-	}
-
-	return std::vector<uint8_t>();
+	return s_ReverseTable[instruction.m_Type]->Assemble(instruction);
 }
 
 Assembler::Level::Level(ReType type, uint32_t index) :
