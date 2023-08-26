@@ -38,7 +38,7 @@ public:
 
 public:
 	Operand() = default;
-	Operand(const DescriptorOperand& descriptor);
+	Operand(const DescriptorOperand& descriptor, bool regOnly);
 
 public:
 	const Package& GetPackage() const;

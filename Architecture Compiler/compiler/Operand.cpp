@@ -1,7 +1,7 @@
 #include "Operand.hpp"
 #include <unordered_map>
 
-Operand::Operand(const DescriptorOperand& descriptor)
+Operand::Operand(const DescriptorOperand& descriptor, bool regOnly)
 {
 	static const std::unordered_map<DescriptorOperand::Type, Type> typeMap = []() -> std::unordered_map<DescriptorOperand::Type, Type>
 	{
@@ -30,6 +30,11 @@ Operand::Operand(const DescriptorOperand& descriptor)
 
 	m_Package.m_Mem = size.m_Mem;
 	m_Package.m_Reg = size.m_Reg;
+
+	if (regOnly && m_Package.m_Type == Type::reg && !flags.m_Constant)
+	{
+		m_Package.m_Type = Type::modrm;
+	}
 }
 
 const Operand::Package& Operand::GetPackage() const

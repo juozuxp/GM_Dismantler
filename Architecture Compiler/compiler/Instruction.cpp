@@ -7,10 +7,29 @@ Instruction::Instruction(const Descriptor& descriptor, uint16_t type) :
 {
 	const std::vector<DescriptorOperand>& operands = descriptor.GetOperands();
 
+	bool regOnly = false;
+	for (const DescriptorOperand& operand : descriptor.GetOperands())
+	{
+		if (operand.GetTypeMask().m_Type == DescriptorOperand::Type::mem)
+		{
+			regOnly = false;
+			break;
+		}
+		else if (operand.GetTypeMask().m_Type == DescriptorOperand::Type::reg && !operand.GetFlagMask().m_Constant)
+		{
+			regOnly = true;
+		}
+		else if (operand.GetTypeMask().m_Type == DescriptorOperand::Type::modrm)
+		{
+			regOnly = false;
+			break;
+		}
+	}
+
 	uint8_t count = ARRAY_SIZE(m_Operands) < operands.size() ? ARRAY_SIZE(m_Operands) : operands.size();
 	for (uint8_t i = 0; i < count; i++)
 	{
-		m_Operands[i] = Operand(operands[i]);
+		m_Operands[i] = Operand(operands[i], regOnly);
 	}
 }
 
