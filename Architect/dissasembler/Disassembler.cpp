@@ -276,11 +276,15 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				else if (mod == 1)
 				{
 					disp = 1;
+
+					resolved.m_Operands[i].m_Memory.m_Base = sib_base + base_extend;
 					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int8_t*>(bytes + 2);
 				}
 				else if (mod == 2)
 				{
 					disp = 4;
+
+					resolved.m_Operands[i].m_Memory.m_Base = sib_base + base_extend;
 					resolved.m_Operands[i].m_Memory.m_Offset = *reinterpret_cast<const int32_t*>(bytes + 2);
 				}
 
@@ -322,11 +326,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		case OpType::reg:
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_Register;
+			resolved.m_Operands[i].m_Register.m_Type = operand.m_Register;
 
 			if (operand.m_Constant)
 			{
-				resolved.m_Operands[i].m_Register.m_Type = operand.m_Register;
-
 				if (operand.m_Rex)
 				{
 					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value + reg_extend;
