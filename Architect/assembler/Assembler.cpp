@@ -1,7 +1,9 @@
-#include "Assembler.hpp"
-#include "Utility.hpp"
 #include <unordered_map>
+#include "Assembler.hpp"
+
+#include "AsmInstruction.hpp"
 #include "AsmIndex.hpp"
+#include "Utility.hpp"
 
 bool Assembler::s_ReverseTableValid = false;
 std::shared_ptr<AsmIndex> Assembler::s_ReverseTable[InsType_ARRAY_MAX];
@@ -36,13 +38,23 @@ Assembler::Assembler()
 
 std::vector<uint8_t> Assembler::Assemble(const std::vector<ILInstruction>& instructions) const
 {
-	std::vector<uint8_t> bytes;
+	std::vector<AsmInstruction::Blob> blobs;
 
+	blobs.reserve(instructions.size());
 	for (const ILInstruction& instruction : instructions)
 	{
-		std::vector<uint8_t> assembled = s_ReverseTable[instruction.m_Type]->Assemble(instruction);
-		bytes.insert(bytes.end(), assembled.begin(), assembled.end());
+		std::shared_ptr<const AsmInstruction> index = s_ReverseTable[instruction.m_Type]->GetIndex(instruction);
+		if (!index)
+		{
+			continue;
+		}
+
+		blobs.push_back(index->Assemble(instruction));
 	}
+
+	std::vector<uint8_t> bytes;
+
+	AsmInstruction::Compile(blobs, bytes);
 
 	return bytes;
 }

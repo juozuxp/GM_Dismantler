@@ -10,7 +10,7 @@ public:
 	void Set(uint8_t value, std::shared_ptr<AsmIndex> index); // if value is == ~0 it's considered default
 
 public:
-	std::vector<uint8_t> Assemble(const ILInstruction& instruction) const override final;
+	std::shared_ptr<const class AsmInstruction> GetIndex(const ILInstruction& instruction) const override final;
 
 private:
 	std::shared_ptr<AsmIndex> m_Entries[17]; // indexed by register, where +8 is REX and 0 is default

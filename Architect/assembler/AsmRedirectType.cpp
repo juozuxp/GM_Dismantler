@@ -1,11 +1,22 @@
 #include "AsmRedirectType.hpp"
+#include "AsmInstruction.hpp"
 
 AsmRedirectType::AsmRedirectType(uint8_t operand) :
 	AsmRedirect(operand)
 {
 }
 
-std::vector<uint8_t> AsmRedirectType::Assemble(const ILInstruction& instruction) const
+void AsmRedirectType::Set(IndexOpType type, std::shared_ptr<AsmIndex> entry)
+{
+	if (type == IndexOpType::modrm)
+	{
+		return;
+	}
+
+	m_Entries[static_cast<uint8_t>(c_IndexTypeToType[static_cast<uint8_t>(type)])] = entry;
+}
+
+std::shared_ptr<const AsmInstruction> AsmRedirectType::GetIndex(const ILInstruction& instruction) const
 {
 	const ILOperand& operand = instruction.m_Operands[m_Operand];
 
@@ -18,18 +29,8 @@ std::vector<uint8_t> AsmRedirectType::Assemble(const ILInstruction& instruction)
 
 	if (!m_Entries[index])
 	{
-		return std::vector<uint8_t>();
+		return nullptr;
 	}
 
-	return m_Entries[index]->Assemble(instruction);
-}
-
-void AsmRedirectType::Set(IndexOpType type, std::shared_ptr<AsmIndex> entry)
-{
-	if (type == IndexOpType::modrm)
-	{
-		return;
-	}
-
-	m_Entries[static_cast<uint8_t>(c_IndexTypeToType[static_cast<uint8_t>(type)])] = entry;
+	return m_Entries[index]->GetIndex(instruction);
 }

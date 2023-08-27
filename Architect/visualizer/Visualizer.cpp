@@ -107,21 +107,21 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 				{
 				case ILOperandScale_8:
 				{
-					int8_t convert = static_cast<int8_t>(operand.m_Value);
+					int8_t convert = static_cast<int8_t>(operand.m_Relative.m_Value);
 
 					sign = convert < 0;
 					value = sign ? -convert : convert;
 				} break;
 				case ILOperandScale_16:
 				{
-					int16_t convert = static_cast<int16_t>(operand.m_Value);
+					int16_t convert = static_cast<int16_t>(operand.m_Relative.m_Value);
 					
 					sign = convert < 0;
 					value = sign ? -convert : convert;
 				} break;
 				case ILOperandScale_32:
 				{
-					int32_t convert = static_cast<int32_t>(operand.m_Value);
+					int32_t convert = static_cast<int32_t>(operand.m_Relative.m_Value);
 					
 					sign = convert < 0;
 					value = sign ? -convert : convert;
@@ -132,12 +132,12 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 			} break;
 			case ILOperandType_MemoryRelative:
 			{
-				if (operand.m_MemoryValue.m_Segment != IL_INVALID_REGISTER)
+				if (operand.m_Relative.m_Segment != IL_INVALID_REGISTER)
 				{
-					printf("s%u:", operand.m_MemoryValue.m_Segment);
+					printf("s%u:", operand.m_Relative.m_Segment);
 				}
 
-				int32_t convert = static_cast<int32_t>(operand.m_MemoryValue.m_Value);
+				int32_t convert = static_cast<int32_t>(operand.m_Relative.m_Value);
 				bool sign = convert < 0;
 
 				printf("[rip %c %X]", sign ? '-' : '+', sign ? -convert : convert);

@@ -91,5 +91,5 @@ private:
 	static std::shared_ptr<AsmIndex> MapOperandRegister(const std::vector<Index>& indexes, uint8_t first);
 
 public:
-	virtual std::vector<uint8_t> Assemble(const ILInstruction& instruction) const = 0;
+	virtual std::shared_ptr<const class AsmInstruction> GetIndex(const ILInstruction& instruction) const = 0;
 };

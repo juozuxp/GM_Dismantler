@@ -7,54 +7,237 @@ AsmInstruction::AsmInstruction(const Index& index) :
 {
 }
 
-const AsmIndex::Index& AsmInstruction::GetTemplate() const
+AsmInstruction::Blob::Blob(const Index& index)
 {
-	return m_Template;
-}
+	m_Valid = true;
 
-std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) const
-{
-	constexpr PfxType segmentToPrefix[] = { Prefix_CS, Prefix_SS, Prefix_DS, Prefix_ES, Prefix_GS, Prefix_FS };
-	constexpr uint8_t prefixToByte[] = { 0x9B, 0xF3, 0xF2, 0x66, 0x48, 0x40, 0x41, 0x42, 0x44, 0xF0, 0x67, 0x2E, 0x36, 0x3E, 0x26, 0x64, 0x65 };
+	m_HasBase = index.m_HasBase;
+	m_Base = index.m_Base;
 
-	Prefix prefixes = {};
+	m_HasX0F383A = index.m_HasX0F383A;
+	m_X0F383A = index.m_X0F383A;
 
-	switch (m_Template.m_Prefix)
+	m_Core = index.m_Instruction;
+
+	switch (index.m_Prefix)
 	{
 	case 0x66:
 	{
-		prefixes.m_x66 = true;
+		m_Prefixes.m_x66 = true;
 	} break;
 	case 0x48:
 	{
-		prefixes.m_REXW = true;
+		m_Prefixes.m_REXW = true;
 	} break;
 	case 0xF2:
 	{
-		prefixes.m_REPNZ = true;
+		m_Prefixes.m_REPNZ = true;
 	} break;
 	case 0xF3:
 	{
-		prefixes.m_REPZ = true;
+		m_Prefixes.m_REPZ = true;
 	} break;
 	}
 
-	bool sib_valid = false;
-	bool modrm_valid = false;
+	if (index.m_OnlyReg)
+	{
+		m_ModRMValid = true;
+		
+		m_ModRM.m_Reg = index.m_ModRM;
+	}
+	else if (index.m_HasModRM)
+	{
+		m_ModRMValid = true;
 
-	DispImmSize imm_type = DispImmSize::none;
-	DispImmSize disp_type = DispImmSize::none;
+		m_ModRM.m_Mem = (index.m_ModRM >> 0) & (8 - 1);
+		m_ModRM.m_Reg = (index.m_ModRM >> 3) & (8 - 1);
+		m_ModRM.m_Mod = (index.m_ModRM >> 6) & (4 - 1);
+	}
+}
 
-	int64_t imm = 0;
-	int64_t disp = 0;
+uint8_t AsmInstruction::Blob::GetSize() const
+{
+	constexpr uint8_t prefixToByte[] = { 0x9B, 0xF3, 0xF2, 0x66, 0x48, 0x40, 0x41, 0x42, 0x44, 0xF0, 0x67, 0x2E, 0x36, 0x3E, 0x26, 0x64, 0x65 };
+	constexpr uint8_t dispImmToSize[] = { 0, 1, 2, 4, 8 };
 
-	uint8_t modrm_mem = 0;
-	uint8_t modrm_reg = 0;
-	uint8_t modrm_mod = 0;
+	if (!m_Valid)
+	{
+		return 0;
+	}
 
-	uint8_t sib_base = 0;
-	uint8_t sib_index = 0;
-	uint8_t sib_scale = 0;
+	uint8_t size = 1;
+
+	bool rex = false;
+	uint16_t prefix = m_Prefixes.m_Prefix;
+	for (uint8_t i = 0; prefix != 0; i++, prefix >>= 1)
+	{
+		if (prefix & 1)
+		{
+			if (prefixToByte[i] >= 0x40 &&
+				prefixToByte[i] <= 0x4F)
+			{
+				rex = true;
+				continue;
+			}
+
+			size += 1;
+		}
+	}
+
+	if (rex)
+	{
+		size += 1;
+	}
+
+	if (m_HasBase)
+	{
+		size += 1;
+	}
+
+	if (m_HasX0F383A)
+	{
+		size += 1;
+	}
+
+	if (m_ModRMValid)
+	{
+		size += 1;
+	}
+
+	if (m_SIBValid)
+	{
+		size += 1;
+	}
+
+	size += dispImmToSize[static_cast<uint8_t>(m_DispSize)];
+	size += dispImmToSize[static_cast<uint8_t>(m_ImmSize)];
+
+	return size;
+}
+
+void AsmInstruction::Compile(const std::vector<Blob>& blobs, std::vector<uint8_t>& bytes)
+{
+	constexpr uint8_t prefixToByte[] = { 0x9B, 0xF3, 0xF2, 0x66, 0x48, 0x40, 0x41, 0x42, 0x44, 0xF0, 0x67, 0x2E, 0x36, 0x3E, 0x26, 0x64, 0x65 };
+
+	uint32_t size = 0;
+	for (const Blob& blob : blobs)
+	{
+		if (!blob.m_Valid)
+		{
+			continue;
+		}
+
+		size += blob.GetSize();
+
+		uint8_t rex = 0;
+		uint16_t prefix = blob.m_Prefixes.m_Prefix;
+		for (uint8_t i = 0; prefix != 0; i++, prefix >>= 1)
+		{
+			if (prefix & 1)
+			{
+				if (prefixToByte[i] >= 0x40 &&
+					prefixToByte[i] <= 0x4F)
+				{
+					rex |= prefixToByte[i];
+					continue;
+				}
+
+				bytes.push_back(prefixToByte[i]);
+			}
+		}
+
+		if (rex != 0)
+		{
+			bytes.push_back(rex);
+		}
+
+		if (blob.m_HasBase)
+		{
+			bytes.push_back(blob.m_Base);
+		}
+
+		if (blob.m_HasX0F383A)
+		{
+			bytes.push_back(blob.m_X0F383A);
+		}
+
+		bytes.push_back(blob.m_Core);
+		if (blob.m_ModRMValid)
+		{
+			bytes.push_back((blob.m_ModRM.m_Mem << 0) | (blob.m_ModRM.m_Reg << 3) | (blob.m_ModRM.m_Mod << 6));
+		}
+
+		if (blob.m_SIBValid)
+		{
+			bytes.push_back((blob.m_SIB.m_Base << 0) | (blob.m_SIB.m_Index << 3) | (blob.m_SIB.m_Scale << 6));
+		}
+
+		if (blob.m_DispSize != DispImmSize::none)
+		{
+			uint32_t offset = bytes.size();
+
+			switch (blob.m_DispSize)
+			{
+			case DispImmSize::size8:
+			{
+				bytes.resize(offset + sizeof(uint8_t));
+				*reinterpret_cast<uint8_t*>(bytes.data() + offset) = static_cast<uint8_t>(blob.m_Disp);
+			} break;
+			case DispImmSize::size16:
+			{
+				bytes.resize(offset + sizeof(uint16_t));
+				*reinterpret_cast<uint16_t*>(bytes.data() + offset) = static_cast<uint16_t>(blob.m_Disp);
+			} break;
+			case DispImmSize::size32:
+			{
+				bytes.resize(offset + sizeof(uint32_t));
+				*reinterpret_cast<uint32_t*>(bytes.data() + offset) = static_cast<uint32_t>(blob.m_Disp);
+			} break;
+			case DispImmSize::size64:
+			{
+				bytes.resize(offset + sizeof(uint64_t));
+				*reinterpret_cast<uint64_t*>(bytes.data() + offset) = static_cast<uint64_t>(blob.m_Disp);
+			} break;
+			}
+		}
+
+		if (blob.m_ImmSize != DispImmSize::none)
+		{
+			uint32_t offset = bytes.size();
+
+			switch (blob.m_ImmSize)
+			{
+			case DispImmSize::size8:
+			{
+				bytes.resize(offset + sizeof(uint8_t));
+				*reinterpret_cast<uint8_t*>(bytes.data() + offset) = static_cast<uint8_t>(blob.m_Imm);
+			} break;
+			case DispImmSize::size16:
+			{
+				bytes.resize(offset + sizeof(uint16_t));
+				*reinterpret_cast<uint16_t*>(bytes.data() + offset) = static_cast<uint16_t>(blob.m_Imm);
+			} break;
+			case DispImmSize::size32:
+			{
+				bytes.resize(offset + sizeof(uint32_t));
+				*reinterpret_cast<uint32_t*>(bytes.data() + offset) = static_cast<uint32_t>(blob.m_Imm);
+			} break;
+			case DispImmSize::size64:
+			{
+				bytes.resize(offset + sizeof(uint64_t));
+				*reinterpret_cast<uint64_t*>(bytes.data() + offset) = static_cast<uint64_t>(blob.m_Imm);
+			} break;
+			}
+		}
+	}
+}
+
+AsmInstruction::Blob AsmInstruction::Assemble(const ILInstruction& instruction) const
+{
+	constexpr uint8_t prefixToByte[] = { 0x9B, 0xF3, 0xF2, 0x66, 0x48, 0x40, 0x41, 0x42, 0x44, 0xF0, 0x67, 0x2E, 0x36, 0x3E, 0x26, 0x64, 0x65 };
+	constexpr PfxType segmentToPrefix[] = { Prefix_CS, Prefix_SS, Prefix_DS, Prefix_ES, Prefix_GS, Prefix_FS };
+
+	Blob blob = Blob(m_Template);
 
 	for (uint8_t i = 0; i < ARRAY_SIZE(instruction.m_Operands); i++)
 	{
@@ -65,7 +248,7 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 		{
 			if (reference.m_Type != IndexOpType::none)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
 			break;
@@ -81,7 +264,7 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_8:
 		{
@@ -90,7 +273,7 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_16:
 		{
@@ -102,17 +285,17 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 			if (size.m_Size == OpSize::base_32 &&
 				size.m_Override1)
 			{
-				prefixes.m_x66 = true;
+				blob.m_Prefixes.m_x66 = true;
 				break;
 			}
 			else if (size.m_Size == OpSize::base_64 &&
 				size.m_Override1)
 			{
-				prefixes.m_x66 = true;
+				blob.m_Prefixes.m_x66 = true;
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_32:
 		{
@@ -124,11 +307,11 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 			if (size.m_Size == OpSize::base_16 &&
 				size.m_Override1)
 			{
-				prefixes.m_x66 = true;
+				blob.m_Prefixes.m_x66 = true;
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_64:
 		{
@@ -140,17 +323,17 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 			if (size.m_Size == OpSize::base_16 &&
 				size.m_Override2)
 			{
-				prefixes.m_REXW = true;
+				blob.m_Prefixes.m_REXW = true;
 				break;
 			}
 			else if (size.m_Size == OpSize::base_32 &&
 				size.m_Override2)
 			{
-				prefixes.m_REXW = true;
+				blob.m_Prefixes.m_REXW = true;
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_128:
 		{
@@ -159,7 +342,7 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_256:
 		{
@@ -168,7 +351,7 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		case ILOperandScale_512:
 		{
@@ -177,7 +360,7 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				break;
 			}
 
-			return std::vector<uint8_t>();
+			return Blob();
 		} break;
 		}
 	}
@@ -199,13 +382,13 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 			if (reference.m_Type != IndexOpType::mem &&
 				reference.m_Type != IndexOpType::modrm)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
-			modrm_valid = true;
+			blob.m_ModRMValid = true;
 			if (operand.m_Memory.m_Segment != IL_INVALID_REGISTER)
 			{
-				prefixes.m_Prefix |= segmentToPrefix[operand.m_Memory.m_Segment];
+				blob.m_Prefixes.m_Prefix |= segmentToPrefix[operand.m_Memory.m_Segment];
 			}
 
 			if ((operand.m_Memory.m_Index != IL_INVALID_REGISTER &&
@@ -214,46 +397,47 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				operand.m_Memory.m_Base == IL_INVALID_REGISTER &&
 				operand.m_Memory.m_Scale != ILMemoryScaler_1)) // [reg + reg], or [reg * x + offs] (where x != 1) required
 			{
-				modrm_mem = 4;
+				blob.m_ModRM.m_Mem = 4;
 
-				sib_valid = true;
+				blob.m_SIBValid = true;
 				if (operand.m_Memory.m_Index >= 8)
 				{
-					prefixes.m_REXX = true;
+					blob.m_Prefixes.m_REXX = true;
 				}
 
-				sib_index = operand.m_Memory.m_Index & (8 - 1);
+				blob.m_SIB.m_Index = operand.m_Memory.m_Index & (8 - 1);
 				if (operand.m_Memory.m_Base != IL_INVALID_REGISTER)
 				{
 					if (operand.m_Memory.m_Base >= 8)
 					{
-						prefixes.m_REXB = true;
+						blob.m_Prefixes.m_REXB = true;
 					}
 
-					sib_base = operand.m_Memory.m_Base & (8 - 1);
+					blob.m_SIB.m_Base = operand.m_Memory.m_Base & (8 - 1);
 				}
 				else
 				{
-					sib_base = 5;
+					blob.m_ModRM.m_Mod = 0;
+					blob.m_SIB.m_Base = 5;
 				}
 
-				sib_scale = operand.m_Memory.m_Scale;
+				blob.m_SIB.m_Scale = operand.m_Memory.m_Scale;
 			}
 			else
 			{
 				uint8_t reg = operand.m_Memory.m_Base != IL_INVALID_REGISTER ? operand.m_Memory.m_Base : operand.m_Memory.m_Index;
 				if (reg >= 8)
 				{
-					prefixes.m_REXB = true;
+					blob.m_Prefixes.m_REXB = true;
 				}
 
-				modrm_mem = reg & (8 - 1);
+				blob.m_ModRM.m_Mem = reg & (8 - 1);
 			}
 
-			if (sib_valid && sib_base == 5)
+			if (blob.m_SIBValid && blob.m_SIB.m_Base == 5)
 			{
-				disp_type = DispImmSize::size32;
-				disp = operand.m_Memory.m_Offset;
+				blob.m_DispSize = DispImmSize::size32;
+				blob.m_Disp = operand.m_Memory.m_Offset;
 			}
 			else
 			{
@@ -262,16 +446,16 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 					if (operand.m_Memory.m_Offset <= INT8_MAX &&
 						operand.m_Memory.m_Offset >= INT8_MIN)
 					{
-						modrm_mod = 1;
-						disp_type = DispImmSize::size8;
+						blob.m_ModRM.m_Mod = 1;
+						blob.m_DispSize = DispImmSize::size8;
 					}
 					else
 					{
-						modrm_mod = 2;
-						disp_type = DispImmSize::size32;
+						blob.m_ModRM.m_Mod = 2;
+						blob.m_DispSize = DispImmSize::size32;
 					}
 
-					disp = operand.m_Memory.m_Offset;
+					blob.m_Disp = operand.m_Memory.m_Offset;
 				}
 			}
 		} break;
@@ -280,12 +464,12 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 			if (reference.m_Type != IndexOpType::reg &&
 				reference.m_Type != IndexOpType::modrm)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
 			if (reference.m_Register != operand.m_Register.m_Type)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
 			uint8_t reg = operand.m_Register.m_Base + (operand.m_Register.m_BaseHigh ? 4 : 0);
@@ -296,12 +480,12 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				{
 					if (reg >= 8)
 					{
-						prefixes.m_REXB = true;
+						blob.m_Prefixes.m_REXB = true;
 					}
 
 					if (operand.m_Scale == ILOperandScale_8 && reg >= 4)
 					{
-						prefixes.m_REX = true;
+						blob.m_Prefixes.m_REX = true;
 					}
 
 					break;
@@ -311,33 +495,33 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 					break;
 				}
 
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
-			modrm_valid = true;
+			blob.m_ModRMValid = true;
 			if (operand.m_Scale == ILOperandScale_8 && reg >= 4)
 			{
-				prefixes.m_REX = true;
+				blob.m_Prefixes.m_REX = true;
 			}
 
 			if (reference.m_Type == IndexOpType::modrm)
 			{
 				if (reg >= 8)
 				{
-					prefixes.m_REXB = true;
+					blob.m_Prefixes.m_REXB = true;
 				}
 
-				modrm_mod = 3;
-				modrm_mem = reg & (8 - 1);
+				blob.m_ModRM.m_Mod = 3;
+				blob.m_ModRM.m_Mem = reg & (8 - 1);
 			}
 			else
 			{
 				if (reg >= 8)
 				{
-					prefixes.m_REXR = true;
+					blob.m_Prefixes.m_REXR = true;
 				}
 
-				modrm_reg = reg & (8 - 1);
+				blob.m_ModRM.m_Reg = reg & (8 - 1);
 			}
 		} break;
 		case ILOperandType_MemoryRelative:
@@ -345,20 +529,22 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 			if (reference.m_Type != IndexOpType::mem &&
 				reference.m_Type != IndexOpType::modrm)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
-			if (operand.m_MemoryValue.m_Segment != IL_INVALID_REGISTER)
+			if (operand.m_Relative.m_Segment != IL_INVALID_REGISTER)
 			{
-				prefixes.m_Prefix |= segmentToPrefix[operand.m_MemoryValue.m_Segment];
+				blob.m_Prefixes.m_Prefix |= segmentToPrefix[operand.m_Relative.m_Segment];
 			}
 
-			modrm_valid = true;
+			blob.m_ModRMValid = true;
 
-			modrm_mod = 0;
-			modrm_mem = 5;
-			
-			disp = operand.m_MemoryValue.m_Value;
+			blob.m_ModRM.m_Mod = 0;
+			blob.m_ModRM.m_Mem = 5;
+
+			blob.m_DispSize = DispImmSize::size32;
+			blob.m_Disp = operand.m_MemoryValue.m_Value;
+			blob.m_DispIndex = operand.m_Relative.m_Index;
 		} break;
 		case ILOperandType_MemoryAbsolute:
 		{
@@ -366,72 +552,72 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 				reference.m_Type != IndexOpType::modrm &&
 				reference.m_Type != IndexOpType::moffs)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
 			if (operand.m_MemoryValue.m_Value >= INT32_MAX &&
 				operand.m_MemoryValue.m_Value <= INT32_MIN &&
 				reference.m_Type != IndexOpType::moffs)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
 			if (operand.m_MemoryValue.m_Segment != IL_INVALID_REGISTER)
 			{
-				prefixes.m_Prefix |= segmentToPrefix[operand.m_MemoryValue.m_Segment];
+				blob.m_Prefixes.m_Prefix |= segmentToPrefix[operand.m_MemoryValue.m_Segment];
 			}
 
 			if (reference.m_Type == IndexOpType::moffs)
 			{
-				disp_type = DispImmSize::size64;
-				disp = operand.m_MemoryValue.m_Value;
+				blob.m_DispSize = DispImmSize::size64;
+				blob.m_Disp = operand.m_MemoryValue.m_Value;
 			}
 			else
 			{
-				sib_valid = true;
-				modrm_valid = true;
+				blob.m_SIBValid = true;
+				blob.m_ModRMValid = true;
 
-				modrm_mod = 0;
-				modrm_mem = 4;
+				blob.m_ModRM.m_Mod = 0;
+				blob.m_ModRM.m_Mem = 4;
 
-				sib_index = 4;
-				sib_base = 5;
+				blob.m_SIB.m_Index = 4;
+				blob.m_SIB.m_Base = 5;
 				
-				disp_type = DispImmSize::size32;
-				disp = operand.m_MemoryValue.m_Value;
+				blob.m_DispSize = DispImmSize::size32;
+				blob.m_Disp = operand.m_MemoryValue.m_Value;
 			}
 		} break;
 		case ILOperandType_Value:
 		{
 			if (reference.m_Type != IndexOpType::imm)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
-			if (imm_type != DispImmSize::none)
+			if (blob.m_ImmSize != DispImmSize::none)
 			{
-				disp = imm;
-				disp_type = imm_type;
+				blob.m_Disp = blob.m_Imm;
+				blob.m_DispSize = blob.m_ImmSize;
 			}
 
-			imm = operand.m_Value;
+			blob.m_Imm = operand.m_Value;
 			switch (operand.m_Scale)
 			{
 			case ILOperandScale_8:
 			{
-				imm_type = DispImmSize::size8;
+				blob.m_ImmSize = DispImmSize::size8;
 			} break;
 			case ILOperandScale_16:
 			{
-				imm_type = DispImmSize::size16;
+				blob.m_ImmSize = DispImmSize::size16;
 			} break;
 			case ILOperandScale_32:
 			{
-				imm_type = DispImmSize::size32;
+				blob.m_ImmSize = DispImmSize::size32;
 			} break;
 			case ILOperandScale_64:
 			{
-				imm_type = DispImmSize::size64;
+				blob.m_ImmSize = DispImmSize::size64;
 			} break;
 			}
 		} break;
@@ -439,156 +625,39 @@ std::vector<uint8_t> AsmInstruction::Assemble(const ILInstruction& instruction) 
 		{
 			if (reference.m_Type != IndexOpType::rel)
 			{
-				return std::vector<uint8_t>();
+				return Blob();
 			}
 
-			disp = operand.m_Value;
+			blob.m_Disp = operand.m_Relative.m_Value;
+			blob.m_DispIndex = operand.m_Relative.m_Index;
 			switch (operand.m_Scale)
 			{
 			case ILOperandScale_8:
 			{
-				disp_type = DispImmSize::size8;
+				blob.m_DispSize = DispImmSize::size8;
 			} break;
 			case ILOperandScale_16:
 			{
-				disp_type = DispImmSize::size16;
+				blob.m_DispSize = DispImmSize::size16;
 			} break;
 			case ILOperandScale_32:
 			{
-				disp_type = DispImmSize::size32;
+				blob.m_DispSize = DispImmSize::size32;
 			} break;
 			case ILOperandScale_64:
 			{
-				disp_type = DispImmSize::size64;
+				blob.m_DispSize = DispImmSize::size64;
 			} break;
 			}
 		} break;
 		}
 	}
 
-	std::vector<uint8_t> bytes;
 
-	uint8_t rex = 0;
-	uint16_t prefix = prefixes.m_Prefix;
-	for (uint8_t i = 0; prefix != 0; i++, prefix >>= 1)
-	{
-		if (prefix & 1)
-		{
-			if (prefixToByte[i] >= 0x40 && 
-				prefixToByte[i] <= 0x4F)
-			{
-				rex |= prefixToByte[i];
-				continue;
-			}
+	return blob;
+}
 
-			bytes.push_back(prefixToByte[i]);
-		}
-	}
-
-	if (rex != 0)
-	{
-		bytes.push_back(rex);
-	}
-
-	if (m_Template.m_HasBase)
-	{
-		bytes.push_back(m_Template.m_Base);
-	}
-
-	if (m_Template.m_HasX0F383A)
-	{
-		bytes.push_back(m_Template.m_X0F383A);
-	}
-
-	bytes.push_back(m_Template.m_Instruction);
-
-	if (m_Template.m_HasModRM)
-	{
-		bytes.push_back(m_Template.m_ModRM);
-	}
-	else if (m_Template.m_OnlyReg || modrm_valid)
-	{
-		uint8_t modrm = 0;
-
-		if (modrm_valid)
-		{
-			modrm = (modrm_mem << 0) | (modrm_mod << 6);
-		}
-
-		if (m_Template.m_OnlyReg)
-		{
-			modrm |= m_Template.m_ModRM << 3;
-		}
-		else
-		{
-			modrm |= modrm_reg << 3;
-		}
-
-		bytes.push_back(modrm);
-	}
-
-	if (sib_valid)
-	{
-		bytes.push_back((sib_base << 0) | (sib_index << 3) | (sib_scale << 6));
-	}
-
-	if (disp_type != DispImmSize::none)
-	{
-		uint32_t offset = bytes.size();
-
-		switch (disp_type)
-		{
-		case DispImmSize::size8:
-		{
-			bytes.resize(bytes.size() + sizeof(uint8_t));
-			*reinterpret_cast<uint8_t*>(bytes.data() + offset) = static_cast<uint8_t>(disp);
-		} break;
-		case DispImmSize::size16:
-		{
-			bytes.resize(bytes.size() + sizeof(uint16_t));
-			*reinterpret_cast<uint16_t*>(bytes.data() + offset) = static_cast<uint16_t>(disp);
-		} break;
-		case DispImmSize::size32:
-		{
-			bytes.resize(bytes.size() + sizeof(uint32_t));
-			*reinterpret_cast<uint32_t*>(bytes.data() + offset) = static_cast<uint32_t>(disp);
-		} break;
-		case DispImmSize::size64:
-		{
-			bytes.resize(bytes.size() + sizeof(uint64_t));
-			*reinterpret_cast<uint64_t*>(bytes.data() + offset) = static_cast<uint64_t>(disp);
-		} break;
-		}
-	}
-
-	if (imm_type != DispImmSize::none)
-	{
-		uint32_t offset = bytes.size();
-
-		switch (imm_type)
-		{
-		case DispImmSize::size8:
-		{
-			bytes.resize(bytes.size() + sizeof(uint8_t));
-			*reinterpret_cast<uint8_t*>(bytes.data() + offset) = static_cast<uint8_t>(imm);
-		} break;
-		case DispImmSize::size16:
-		{
-			bytes.resize(bytes.size() + sizeof(uint16_t));
-			*reinterpret_cast<uint16_t*>(bytes.data() + offset) = static_cast<uint16_t>(imm);
-		} break;
-		case DispImmSize::size32:
-		{
-			bytes.resize(bytes.size() + sizeof(uint32_t));
-			*reinterpret_cast<uint32_t*>(bytes.data() + offset) = static_cast<uint32_t>(imm);
-		} break;
-		case DispImmSize::size64:
-		{
-			bytes.resize(bytes.size() + sizeof(uint64_t));
-			*reinterpret_cast<uint64_t*>(bytes.data() + offset) = static_cast<uint64_t>(imm);
-		} break;
-		}
-	}
-
-	return bytes;
+std::shared_ptr<const AsmInstruction> AsmInstruction::GetIndex(const ILInstruction& instruction) const
+{
+	return std::reinterpret_pointer_cast<const AsmInstruction>(shared_from_this());
 }

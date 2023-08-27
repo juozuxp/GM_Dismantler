@@ -305,8 +305,9 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				disp = 4;
 
 				resolved.m_Operands[i].m_Type = ILOperandType_MemoryRelative;
-				resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
-				resolved.m_Operands[i].m_MemoryValue.m_Value = *reinterpret_cast<const uint32_t*>(bytes + 1);
+				resolved.m_Operands[i].m_Relative.m_Index = false;
+				resolved.m_Operands[i].m_Relative.m_Segment = GetSegment(prefixes);
+				resolved.m_Operands[i].m_Relative.m_Value = *reinterpret_cast<const uint32_t*>(bytes + 1);
 				break;
 			}
 			else if (mod == 1)
@@ -369,78 +370,88 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			break;
 		}
 
+		if (operand.m_Type != OpType::imm &&
+			operand.m_Type != OpType::rel &&
+			operand.m_Type != OpType::moffs)
+		{
+			continue;
+		}
+
+		int64_t value = 0;
+		if (operand.m_Constant)
+		{
+			value = operand.m_Value;
+		}
+		else
+		{
+			switch (operand.m_Mem.m_Size)
+			{
+			case OpSize::base_8:
+			{
+				value = *reinterpret_cast<const int8_t*>(bytes);
+				bytes += 1;
+			} break;
+			case OpSize::base_16:
+			{
+				if (operand.m_Mem.m_Override1 && prefixes.m_x66)
+				{
+					value = *reinterpret_cast<const int32_t*>(bytes);
+					bytes += 4;
+				}
+				else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
+				{
+					value = *reinterpret_cast<const int64_t*>(bytes);
+					bytes += 8;
+				}
+				else
+				{
+					value = *reinterpret_cast<const int16_t*>(bytes);
+					bytes += 2;
+				}
+			} break;
+			case OpSize::base_32:
+			{
+				if (operand.m_Mem.m_Override1 && prefixes.m_x66)
+				{
+					value = *reinterpret_cast<const int16_t*>(bytes);
+					bytes += 2;
+				}
+				else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
+				{
+					value = *reinterpret_cast<const int64_t*>(bytes);
+					bytes += 8;
+				}
+				else
+				{
+					value = *reinterpret_cast<const int32_t*>(bytes);
+					bytes += 4;
+				}
+			} break;
+			default:
+			{
+				value = *reinterpret_cast<const int64_t*>(bytes);
+				bytes += 8;
+			} break;
+			}
+		}
+
 		if (operand.m_Type == OpType::imm)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_Value;
+			resolved.m_Operands[i].m_Value = value;
 		}
 		else if (operand.m_Type == OpType::rel)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
+			resolved.m_Operands[i].m_Relative.m_Index = false;
+			resolved.m_Operands[i].m_Relative.m_Value = value;
 		}
 		else if (operand.m_Type == OpType::moffs)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_MemoryAbsolute;
-			resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
-		}
-		else
-		{
-			continue;
-		}
-
-		if (operand.m_Constant)
-		{
-			resolved.m_Operands[i].m_Value = operand.m_Value;
-			continue;
-		}
-
-		switch (operand.m_Mem.m_Size)
-		{
-		case OpSize::base_8:
-		{
-			resolved.m_Operands[i].m_Value = *reinterpret_cast<const int8_t*>(bytes);
-			bytes += 1;
-		} break;
-		case OpSize::base_16:
-		{
-			if (operand.m_Mem.m_Override1 && prefixes.m_x66)
-			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int32_t*>(bytes);
-				bytes += 4;
-			}
-			else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
-			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int64_t*>(bytes);
-				bytes += 8;
-			}
-			else
-			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int16_t*>(bytes);
-				bytes += 2;
-			}
-		} break;
-		case OpSize::base_32:
-		{
-			if (operand.m_Mem.m_Override1 && prefixes.m_x66)
-			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int16_t*>(bytes);
-				bytes += 2;
-			}
-			else if (operand.m_Mem.m_Override2 && prefixes.m_REXW)
-			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int64_t*>(bytes);
-				bytes += 8;
-			}
-			else
-			{
-				resolved.m_Operands[i].m_Value = *reinterpret_cast<const int32_t*>(bytes);
-				bytes += 4;
-			}
-		} break;
-		default:
-		{
-			resolved.m_Operands[i].m_Value = *reinterpret_cast<const int64_t*>(bytes);
-			bytes += 8;
-		} break;
+			resolved.m_Operands[i].m_Relative.m_Index = false;
+			resolved.m_Operands[i].m_Relative.m_Value = value;
+			resolved.m_Operands[i].m_Relative.m_Segment = GetSegment(prefixes);
 		}
 	}
 

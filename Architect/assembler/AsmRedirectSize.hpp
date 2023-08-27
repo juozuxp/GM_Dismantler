@@ -10,7 +10,7 @@ public:
 	void Set(OpSize size, std::shared_ptr<AsmIndex> entry);
 
 public:
-	std::vector<uint8_t> Assemble(const ILInstruction& instruction) const override final;
+	std::shared_ptr<const class AsmInstruction> GetIndex(const ILInstruction& instruction) const override final;
 
 private:
 	std::shared_ptr<AsmIndex> m_Entries[10]; // indexed from OpSize
