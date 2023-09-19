@@ -96,7 +96,7 @@ void Visualizer::PrintToConsole(const std::vector<ILInstruction>& instructions)
 			} break;
 			case ILOperandType_Value:
 			{
-				printf("%llX", operand.m_Value);
+				printf("%lli", operand.m_Value);
 			} break;
 			case ILOperandType_ValueRelative:
 			{

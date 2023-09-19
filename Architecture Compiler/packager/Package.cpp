@@ -296,10 +296,10 @@ std::string Package::GetCoreStructures() const
 	std::string CoreFullRedirect =
 	{
 		"#pragma pack(push, 1)\n"
-		"	struct FullRedirect\n"
-		"	{\n"
-		"		uint16_t m_BaseIndex;\n"
-		"	};\n"
+		"struct FullRedirect\n"
+		"{\n"
+		"	uint16_t m_BaseIndex;\n"
+		"};\n"
 		"#pragma pack(pop)"
 	};
 
