@@ -4,6 +4,11 @@
 
 Token::Token(const std::string_view& line)
 {
+	if (line.empty())
+	{
+		return;
+	}
+
 	std::string lineCopy = std::string(line);
 
 	std::transform(lineCopy.begin(), lineCopy.end(), lineCopy.begin(), tolower);
@@ -25,8 +30,11 @@ Token::Token(const std::string_view& line)
 
 		if (lineCopy[i] == ' ' || lineCopy[i] == '\t')
 		{
-			m_Bytes.push_back(std::string(lineCopy.data() + byte, i - byte));
-			byte = ~0;
+			if (byte != ~0)
+			{
+				m_Bytes.push_back(std::string(lineCopy.data() + byte, i - byte));
+				byte = ~0;
+			}
 		}
 		else
 		{
@@ -37,10 +45,17 @@ Token::Token(const std::string_view& line)
 		}
 	}
 
+	if (seperator == 0)
+	{
+		m_Bytes.clear();
+		return;
+	}
+
 	for (uint32_t i = seperator + 2;; i++)
 	{
 		if (i >= lineCopy.size())
 		{
+			m_Bytes.clear();
 			return;
 		}
 

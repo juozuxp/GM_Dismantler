@@ -1,24 +1,22 @@
 #include "Disassembler.hpp"
 #include "Utility.hpp"
 
-std::vector<ILInstruction> Disassembler::Disassemble(const void* base, uint32_t size)
+void Disassembler::Disassemble(const void* base, uint32_t size, std::vector<ILInstruction>& instructions) const
 {
-	std::vector<ILInstruction> instructions;
-
 	ILInstruction instruction = {};
 
-	uint8_t instructionSize = 0;
 	for (uint32_t i = 0; i < size; i += instruction.m_Size)
 	{
 		instruction = Disassemble(reinterpret_cast<const uint8_t*>(base) + i);
 		instructions.push_back(instruction);
 	}
-
-	return instructions;
 }
 
-ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
+ILInstruction Disassembler::Disassemble(const uint8_t* instruction) const
 {
+	const uint8_t registerCount[] = { 16, 16, 8, 4, 8, 6, 16, 16 }; // general, xmm, mm, bnd, st, sreg, cr, dr
+	const bool rexExtendable[] = { true, true, false, false, false, false, true, true }; // general, xmm, mm, bnd, st, sreg, cr, dr
+
 	const Package* core = reinterpret_cast<const Package*>(CompiledPackage);
 	const uint8_t* bytes = instruction;
 
@@ -61,18 +59,19 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		{
 			if (prefixes.m_REX)
 			{
-				resolved.m_Size = 1;
-				return resolved;
+				ILInstruction invalid = {};
+
+				invalid.m_Size = 1;
+				return invalid;
 			}
 
 			if (package->m_Prefix.m_Instruction != InsType_invalid)
 			{
 				if (prefixes.m_Instruction != InsType_invalid)
 				{
-					ILInstruction bytes;
-
-					bytes.m_Type = prefixes.m_Instruction;
-					return bytes;
+					resolved.m_Type = package->m_Prefix.m_Instruction;
+					resolved.m_Size = 1;
+					return resolved;
 				}
 
 				prefixes.m_Instruction = package->m_Prefix.m_Instruction;
@@ -97,22 +96,20 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				{
 					if (!redirect.m_Prefix.m_ValidDefault)
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 
 					package = &core[redirect.m_BaseIndex + redirect.m_Prefix.m_IndexDefault];
 				}
-				else if (((redirect.m_Prefix.m_Value >> count) & 1) != 0)
-				{
-					uint8_t index = ((redirect.m_Prefix.m_Value >> 8) >> (count * 3)) & ((1 << 3) - 1);
-
-					package = &core[redirect.m_BaseIndex + index];
-				}
 				else
 				{
-					resolved.m_Size = 1;
-					return resolved;
+					uint8_t index = ((redirect.m_Prefix.m_Value >> 8) >> (count * 3)) & ((1 << 3) - 1);
+					package = &core[redirect.m_BaseIndex + index];
+
+					prefixes.m_Instruction = InsType_invalid;
 				}
 			}
 			else if (redirect.m_Type == ReType::X0F383A)
@@ -121,11 +118,15 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				{
 					uint8_t index = ((redirect.m_x0F383A.m_Value >> 4) >> (x0F383A * 2)) & ((1 << 2) - 1);
 					package = &core[redirect.m_BaseIndex + index];
+
+					x0F383A = X0F383A_None;
 				}
 				else
 				{
-					resolved.m_Size = 1;
-					return resolved;
+					ILInstruction invalid = {};
+
+					invalid.m_Size = 1;
+					return invalid;
 				}
 			}
 			else
@@ -151,8 +152,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 					}
 					else
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 				} break;
 				case ReType::Reg:
@@ -163,8 +166,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 					}
 					else
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 				} break;
 				case ReType::Mod:
@@ -175,8 +180,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 					}
 					else
 					{
-						resolved.m_Size = 1;
-						return resolved;
+						ILInstruction invalid = {};
+
+						invalid.m_Size = 1;
+						return invalid;
 					}
 				} break;
 				}
@@ -186,6 +193,21 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		}
 
 		break;
+	}
+
+	if (x0F383A != X0F383A_None)
+	{
+		ILInstruction invalid = {};
+
+		invalid.m_Size = 1;
+		return invalid;
+	}
+
+	if (prefixes.m_Instruction != InsType_invalid)
+	{
+		resolved.m_Size = 1;
+		resolved.m_Type = prefixes.m_Instruction;
+		return resolved;
 	}
 
 	uint8_t sib_base = ~0;
@@ -220,12 +242,22 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 
 			if (mod == 3)
 			{
+				bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && mem >= 4;
+
 				resolved.m_Operands[i].m_Type = ILOperandType_Register;
 
-				resolved.m_Operands[i].m_Register.m_Base = mem + base_extend;
+				resolved.m_Operands[i].m_Register.m_Base = mem - (high ? 4 : 0) + (rexExtendable[static_cast<uint8_t>(operand.m_Register)] ? base_extend : 0);
 				resolved.m_Operands[i].m_Register.m_Type = operand.m_Register;
 
-				resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && mem >= 4;
+				resolved.m_Operands[i].m_Register.m_BaseHigh = high;
+
+				if (resolved.m_Operands[i].m_Register.m_Base >= registerCount[static_cast<uint8_t>(operand.m_Register)])
+				{
+					ILInstruction invalid = {};
+
+					invalid.m_Size = 1;
+					return invalid;
+				}
 
 				break;
 			}
@@ -305,7 +337,6 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				disp = 4;
 
 				resolved.m_Operands[i].m_Type = ILOperandType_MemoryRelative;
-				resolved.m_Operands[i].m_Relative.m_Index = false;
 				resolved.m_Operands[i].m_Relative.m_Segment = GetSegment(prefixes);
 				resolved.m_Operands[i].m_Relative.m_Value = *reinterpret_cast<const uint32_t*>(bytes + 1);
 				break;
@@ -333,8 +364,10 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			{
 				if (operand.m_Rex)
 				{
-					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value + reg_extend;
-					resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && operand.m_Value >= 4;
+					bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && operand.m_Value >= 4;
+
+					resolved.m_Operands[i].m_Register.m_Base = operand.m_Value - (high ? 4 : 0) + base_extend;
+					resolved.m_Operands[i].m_Register.m_BaseHigh = high;
 				}
 				else
 				{
@@ -353,8 +386,18 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 				mod = (modrrm >> 6) & ((1 << 2) - 1);
 			}
 
-			resolved.m_Operands[i].m_Register.m_Base = reg + reg_extend;
-			resolved.m_Operands[i].m_Register.m_BaseHigh = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && reg >= 4;
+			bool high = !prefixes.m_REX && (operand.m_Reg.m_Size == OpSize::base_8) && (operand.m_Register == Register::general) && reg >= 4;
+
+			resolved.m_Operands[i].m_Register.m_Base = reg - (high ? 4 : 0) + (rexExtendable[static_cast<uint8_t>(operand.m_Register)] ? reg_extend : 0);
+			resolved.m_Operands[i].m_Register.m_BaseHigh = high;
+
+			if (resolved.m_Operands[i].m_Register.m_Base >= registerCount[static_cast<uint8_t>(operand.m_Register)])
+			{
+				ILInstruction invalid = {};
+
+				invalid.m_Size = 1;
+				return invalid;
+			}
 		} break;
 		}
 	}
@@ -370,6 +413,7 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 			break;
 		}
 
+
 		if (operand.m_Type != OpType::imm &&
 			operand.m_Type != OpType::rel &&
 			operand.m_Type != OpType::moffs)
@@ -381,6 +425,11 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		if (operand.m_Constant)
 		{
 			value = operand.m_Value;
+		}
+		else if (operand.m_Type == OpType::moffs)
+		{
+			value = *reinterpret_cast<const int64_t*>(bytes);
+			bytes += 8;
 		}
 		else
 		{
@@ -443,15 +492,14 @@ ILInstruction Disassembler::Disassemble(const uint8_t* instruction)
 		else if (operand.m_Type == OpType::rel)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_ValueRelative;
-			resolved.m_Operands[i].m_Relative.m_Index = false;
 			resolved.m_Operands[i].m_Relative.m_Value = value;
+			resolved.m_Operands[i].m_Relative.m_Segment = IL_INVALID_REGISTER;
 		}
 		else if (operand.m_Type == OpType::moffs)
 		{
 			resolved.m_Operands[i].m_Type = ILOperandType_MemoryAbsolute;
-			resolved.m_Operands[i].m_Relative.m_Index = false;
-			resolved.m_Operands[i].m_Relative.m_Value = value;
-			resolved.m_Operands[i].m_Relative.m_Segment = GetSegment(prefixes);
+			resolved.m_Operands[i].m_MemoryValue.m_Value = value;
+			resolved.m_Operands[i].m_MemoryValue.m_Segment = GetSegment(prefixes);
 		}
 	}
 

@@ -3,6 +3,7 @@
 #include "Redirection.hpp"
 #include "Prefix.hpp"
 #include "tools/ArraySize.h"
+#include <assert.h>
 
 #define GET_REG(modrrm) ((modrrm >> 3) & ((1 << 3) - 1))
 #define GET_MOD(modrrm) ((modrrm >> 6) & ((1 << 2) - 1))
@@ -146,10 +147,10 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 			{
 				std::shared_ptr<Prefix> prefix = std::reinterpret_pointer_cast<Prefix>(entry);
 
-				_ASSERT(prefix->GetRedirectPrefix() != Redirection::Prefix::Default);
-				_ASSERT(prefix->GetRedirectPrefix() == Redirection::Prefix::Wait); // only known instance for now
-				_ASSERT(redirections.size() == 0);
-				_ASSERT(!prefix->IsStandAlone());
+				assert(prefix->GetRedirectPrefix() != Redirection::Prefix::Default);
+				assert(prefix->GetRedirectPrefix() == Redirection::Prefix::Wait); // only known instance for now
+				assert(redirections.size() == 0);
+				assert(!prefix->IsStandAlone());
 
 				prefix->SetStandAlone(m_Types[descriptor.GetName()]);
 			}
@@ -179,7 +180,7 @@ void InstructionSet::Insert(const Descriptor& descriptor)
 		}
 		else
 		{
-			_ASSERT(false);
+			assert(false);
 		}
 	}
 }

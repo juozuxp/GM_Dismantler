@@ -16,6 +16,5 @@ int main()
 		}
 	}
 
-	// package.AddPackages("test.txt");
 	package.AssemblePackage().OutputToHeader("../Architect/include/x86_x64.hpp");
 }

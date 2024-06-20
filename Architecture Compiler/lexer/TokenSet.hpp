@@ -10,8 +10,8 @@ class TokenSet
 public:
 	TokenSet() = default;
 
-	TokenSet(std::string text);
-	TokenSet(std::ifstream& file);
+	TokenSet(std::ifstream&& file);
+	TokenSet(const std::string_view& text);
 
 public:
 	TokenSet& operator<<(const TokenSet& lhs);

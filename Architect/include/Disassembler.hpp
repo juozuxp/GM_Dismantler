@@ -6,10 +6,10 @@
 class Disassembler
 {
 public:
-	std::vector<ILInstruction> Disassemble(const void* base, uint32_t size);
+	void Disassemble(const void* base, uint32_t size, std::vector<ILInstruction>& instructions) const;
 
 private:
-	ILInstruction Disassemble(const uint8_t* instruction);
+	ILInstruction Disassemble(const uint8_t* instruction) const;
 
 private:
 	static constexpr uint8_t GetSegment(Prefix prefixes)

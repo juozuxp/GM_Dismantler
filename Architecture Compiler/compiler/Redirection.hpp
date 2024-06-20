@@ -145,6 +145,7 @@ public:
 public:
 	Redirection() = default;
 
+private:
 	Redirection(Type type);
 	Redirection(const Instruction& instruction);
 	Redirection(std::shared_ptr<Instruction> instruction);
@@ -178,4 +179,7 @@ private:
 private:
 	Type m_Type = Type::None;
 	std::shared_ptr<ByteEntry> m_Redirects[8];
+
+private:
+	friend class Redirection_Unit;
 };

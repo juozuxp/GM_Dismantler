@@ -23,6 +23,6 @@ private:
 	{
 	}
 
-public:
+private:
 	std::vector<std::wstring> m_Paths;
 };

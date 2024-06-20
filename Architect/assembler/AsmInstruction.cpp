@@ -544,7 +544,6 @@ AsmInstruction::Blob AsmInstruction::Assemble(const ILInstruction& instruction) 
 
 			blob.m_DispSize = DispImmSize::size32;
 			blob.m_Disp = operand.m_MemoryValue.m_Value;
-			blob.m_DispIndex = operand.m_Relative.m_Index;
 		} break;
 		case ILOperandType_MemoryAbsolute:
 		{
@@ -629,7 +628,7 @@ AsmInstruction::Blob AsmInstruction::Assemble(const ILInstruction& instruction) 
 			}
 
 			blob.m_Disp = operand.m_Relative.m_Value;
-			blob.m_DispIndex = operand.m_Relative.m_Index;
+
 			switch (operand.m_Scale)
 			{
 			case ILOperandScale_8:

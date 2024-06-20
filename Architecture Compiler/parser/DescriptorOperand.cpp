@@ -1,6 +1,7 @@
 #include "DescriptorOperand.hpp"
 #include "tools/ArraySize.h"
 #include <math.h>
+#include <assert.h>
 
 DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 {
@@ -8,6 +9,11 @@ DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 
 	for (std::string variation : variations)
 	{
+		if (variation.empty())
+		{
+			continue;
+		}
+
 		if (!found)
 		{
 			found = true;
@@ -88,11 +94,11 @@ DescriptorOperand::DescriptorOperand(const std::vector<std::string>& variations)
 		}
 	}
 
-	_ASSERT(m_Size.m_Mem.m_Size != Size::base_64 || !m_Size.m_Mem.m_Override2);
-	_ASSERT(m_Size.m_Reg.m_Size != Size::base_64 || !m_Size.m_Reg.m_Override2);
+	assert(m_Size.m_Mem.m_Size != Size::base_64 || !m_Size.m_Mem.m_Override2);
+	assert(m_Size.m_Reg.m_Size != Size::base_64 || !m_Size.m_Reg.m_Override2);
 
-	_ASSERT(!(m_Size.m_Mem.m_Size == Size::base_512 || m_Size.m_Mem.m_Size == Size::base_256 || m_Size.m_Mem.m_Size == Size::base_80 || m_Size.m_Mem.m_Size == Size::base_8 || m_Size.m_Mem.m_Size == Size::undefined) || !(m_Size.m_Mem.m_Override1 && m_Size.m_Mem.m_Override2));
-	_ASSERT(!(m_Size.m_Reg.m_Size == Size::base_512 || m_Size.m_Reg.m_Size == Size::base_256 || m_Size.m_Reg.m_Size == Size::base_80 || m_Size.m_Reg.m_Size == Size::base_8 || m_Size.m_Reg.m_Size == Size::undefined) || !(m_Size.m_Reg.m_Override1 && m_Size.m_Reg.m_Override2));
+	assert(!(m_Size.m_Mem.m_Size == Size::base_512 || m_Size.m_Mem.m_Size == Size::base_256 || m_Size.m_Mem.m_Size == Size::base_80 || m_Size.m_Mem.m_Size == Size::base_8 || m_Size.m_Mem.m_Size == Size::undefined) || !(m_Size.m_Mem.m_Override1 && m_Size.m_Mem.m_Override2));
+	assert(!(m_Size.m_Reg.m_Size == Size::base_512 || m_Size.m_Reg.m_Size == Size::base_256 || m_Size.m_Reg.m_Size == Size::base_80 || m_Size.m_Reg.m_Size == Size::base_8 || m_Size.m_Reg.m_Size == Size::undefined) || !(m_Size.m_Reg.m_Override1 && m_Size.m_Reg.m_Override2));
 }
 
 const DescriptorOperand::TypeMask& DescriptorOperand::GetTypeMask() const
@@ -154,9 +160,9 @@ bool DescriptorOperand::ParseForMm(const std::string_view& variation)
 				{
 					if (!strncmp(variation.data() + 2, "/m", 2))
 					{
+						m_Type.m_Type = Type::modrm;
 						ParseSize(variation.data() + 4);
 
-						m_Type.m_Type = Type::modrm;
 						return true;
 					}
 				}
@@ -165,7 +171,7 @@ bool DescriptorOperand::ParseForMm(const std::string_view& variation)
 	}
 	else
 	{
-		_ASSERT(m_Type.m_Type == Type::none);
+		assert(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
 		AssignSize(&m_Size.m_Reg, 64);
@@ -219,9 +225,9 @@ bool DescriptorOperand::ParseForSt(const std::string_view& variation)
 			{
 				if (!strncmp(variation.data() + 2, "/m", 2))
 				{
+					m_Type.m_Type = Type::modrm;
 					ParseSize(variation.data() + 4);
 
-					m_Type.m_Type = Type::modrm;
 					return true;
 				}
 			}
@@ -229,7 +235,7 @@ bool DescriptorOperand::ParseForSt(const std::string_view& variation)
 	}
 	else
 	{
-		_ASSERT(m_Type.m_Type == Type::none);
+		assert(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
 		AssignSize(&m_Size.m_Reg, 80);
@@ -326,9 +332,9 @@ bool DescriptorOperand::ParseForXmm(const std::string_view& variation)
 				{
 					if (!strncmp(variation.data() + 3, "/m", 2))
 					{
+						m_Type.m_Type = Type::modrm;
 						ParseSize(variation.data() + 5);
 
-						m_Type.m_Type = Type::modrm;
 						return true;
 					}
 				}
@@ -337,7 +343,7 @@ bool DescriptorOperand::ParseForXmm(const std::string_view& variation)
 	}
 	else
 	{
-		_ASSERT(m_Type.m_Type == Type::none);
+		assert(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
 		AssignSize(&m_Size.m_Reg, 128);
@@ -362,7 +368,7 @@ bool DescriptorOperand::ParseForBnd(const std::string_view& variation)
 
 		if (variation.size() != 3)
 		{
-			if (variation[3] != '/' && (variation[3] < '0' || variation[3] > '9'))
+			if (variation[3] != '/')
 			{
 				return false;
 			}
@@ -375,15 +381,15 @@ bool DescriptorOperand::ParseForBnd(const std::string_view& variation)
 	{
 		if (!strncmp(variation.data(), "bnd/m", 5))
 		{
+			m_Type.m_Type = Type::modrm;
 			ParseSize(variation.data() + 5);
 
-			m_Type.m_Type = Type::modrm;
 			return true;
 		}
 	}
 	else
 	{
-		_ASSERT(m_Type.m_Type == Type::none);
+		assert(m_Type.m_Type == Type::none);
 
 		m_Type.m_Type = Type::reg;
 		AssignSize(&m_Size.m_Reg, 128);
@@ -638,12 +644,12 @@ void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 	{
 	case 8:
 	{
-		_ASSERT(mask->m_Size == Size::base_8 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_8 || mask->m_Size == Size::undefined);
 		mask->m_Size = Size::base_8;
 	} break;
 	case 16:
 	{
-		_ASSERT(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64 || mask->m_Size == Size::undefined);
 
 		if (mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64)
 		{
@@ -656,7 +662,7 @@ void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 	} break;
 	case 32:
 	{
-		_ASSERT(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::undefined);
 
 		if (mask->m_Size == Size::base_16)
 		{
@@ -669,7 +675,7 @@ void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 	} break;
 	case 64:
 	{
-		_ASSERT(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_16 || mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64 || mask->m_Size == Size::undefined);
 
 		if (mask->m_Size == Size::base_32 || mask->m_Size == Size::base_64)
 		{
@@ -682,17 +688,17 @@ void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 	} break;
 	case 80:
 	{
-		_ASSERT(mask->m_Size == Size::base_80 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_80 || mask->m_Size == Size::undefined);
 		mask->m_Size = Size::base_80;
 	} break;
 	case 128:
 	{
-		_ASSERT(mask->m_Size == Size::base_128 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_128 || mask->m_Size == Size::undefined);
 		mask->m_Size = Size::base_128;
 	} break;
 	case 256:
 	{
-		_ASSERT(mask->m_Size == Size::base_128 || mask->m_Size == Size::base_256 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_128 || mask->m_Size == Size::base_256 || mask->m_Size == Size::undefined);
 
 		if (mask->m_Size == Size::base_128)
 		{
@@ -705,7 +711,7 @@ void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 	} break;
 	case 512:
 	{
-		_ASSERT(mask->m_Size == Size::base_128 || mask->m_Size == Size::base_512 || mask->m_Size == Size::undefined);
+		assert(mask->m_Size == Size::base_128 || mask->m_Size == Size::base_512 || mask->m_Size == Size::undefined);
 
 		if (mask->m_Size == Size::base_128)
 		{
@@ -718,7 +724,7 @@ void DescriptorOperand::AssignSize(OperandSize* mask, uint32_t size)
 	} break;
 	default:
 	{
-		_ASSERT(false);
+		assert(false);
 	} break;
 	}
 }
@@ -760,7 +766,7 @@ uint8_t DescriptorOperand::ParseSize(const std::string_view& variation)
 			} break;
 			default:
 			{
-				_ASSERT(false);
+				assert(false);
 			} break;
 			}
 

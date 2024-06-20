@@ -1,5 +1,6 @@
 #include "Prefix.hpp"
 #include "BytePackage.hpp"
+#include <assert.h>
 
 Prefix::Prefix(uint32_t prefix) :
 	m_Prefix(prefix)
@@ -67,6 +68,6 @@ Prefix::PackageType Prefix::GetPackageType() const
 
 Redirection::Prefix Prefix::GetRedirectPrefix() const
 {
-	_ASSERT(m_RedirectPrefix != Redirection::Prefix::Default);
+	assert(m_RedirectPrefix != Redirection::Prefix::Default);
 	return m_RedirectPrefix;
 }

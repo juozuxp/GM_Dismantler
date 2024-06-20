@@ -6,9 +6,7 @@ Package Packager::AssemblePackage() const
 
 	for (const std::wstring& file : m_Paths)
 	{
-		std::ifstream stream = std::ifstream(file);
-
-		tokens << TokenSet(stream);
+		tokens << TokenSet(std::ifstream(file));
 	}
 
 	DescriptorSet descriptors = DescriptorSet(tokens);
